@@ -1,0 +1,31 @@
+State, parcel, n, m, num_minority_districts, s, iterations, region_aware, total time 
+MS,county,82,202,0,8,NA,Warm Start,0.78
+MS,county,82,202,1,7,9999,False,527.34
+MS,tract,878,2378,0,16,NA,Warm Start,36.45
+MS,tract,878,2378,1,16,9999,False,6732.38
+LA,tract,1388,3861,0,18,NA,Warm Start,49.93
+LA,tract,1388,3861,0,16,9999,False,10909.54
+SC,tract,1323,3677,0,20,NA,Warm Start,32.56
+SC,tract,1323,3677,1,20,9999,False,8380.26
+AL,tract,1437,4014,0,18,NA,Warm Start,69.92
+AL,tract,1437,4014,1,24,9999,False,9766.51
+MD,tract,1475,3993,1,27,NA,Warm Start,24.95
+MD,tract,1475,3993,3,23,9999,False,9028.43
+MO,tract,1654,4488,0,19,NA,Warm Start,78.28
+MO,tract,1654,4488,0,16,9999,False,11007.40
+TN,tract,1701,4691,1,19,NA,Warm Start,100.96
+TN,tract,1701,4691,1,17,9999,False,10478.86
+VA,tract,2198,6064,0,22,NA,Warm Start,150.74
+VA,tract,2198,6064,0,19,9999,False,13963.14
+NJ,tract,2181,6061,0,18,NA,Warm Start,71.01
+NJ,tract,2181,6061,0,16,9999,False,12575.14
+MI,tract,3017,7989,0,20,NA,Warm Start,188.85
+MI,tract,3017,7989,1,21,9999,False,21623.36
+NC,tract,2672,7422,0,21,NA,Warm Start,112.36
+NC,tract,2672,7422,0,18,9999,False,16213.94
+GA,tract,2796,7762,2,25,NA,Warm Start,131.22
+IL,tract,3265,8728,0,23,NA,Warm Start,488.83
+IL,tract,3265,8728,0,23,NA,Warm Start,600.00
+IL,tract,3265,8728,2,18,9999,False,19602.93
+TX,tract,6896,18554,0,22,NA,Warm Start,4580.32
+TX,tract,6896,18554,0,20,9999,False,37415.17
