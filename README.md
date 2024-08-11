@@ -1,5 +1,5 @@
 # Summary
-This github repository contains the all the code used in the paper "Bounding the number and the diameter of compact Black-majority districts" authored by Samuel Kroger, Hamidreza Validi, Tyler Perini, and Illya V. Hicks. This work is concerned with using mixed integer programs to generate compact redistricting plans which includes minority districts. Below you will sections about recent districting in Alabama which inpired this work, an outline of the problem, and instructions on how to run the code.
+This GitHub repository contains all the code used in the paper "Bounding the number and the diameter of compact Black-majority districts," authored by Samuel Kroger, Hamidreza Validi, Illya V. Hicks, and Tyler Perini. This work is concerned with using mixed integer programs to generate compact redistricting plans that include minority districts. Below, you will find sections about recent districting in Alabama, which inspired this work, an outline of the problem, and instructions on how to run the code.
 
 # Recent News
 
