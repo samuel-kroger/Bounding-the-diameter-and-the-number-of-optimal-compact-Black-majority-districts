@@ -7,7 +7,7 @@ The following figures show two county-level maps of MS that are obtained by our 
 
 A MIP-generated map of MS/county with one Black-majority and diameter of 6             |  A GerryChain-generated map of MS/county with one Black-majority district and diameter of 7
 :-------------------------:|:-------------------------:
-![](readme_imagesMS_map_MIP_opt.png?raw=true "A MIP-generated map of MS/county with one Black-majority and diameter of 6")   |  ![](readme_images/short_bursts_opt.png?raw=true "A GerryChain-generated map of MS/county with one Black-majority district and diameter of 7")
+![](readme_images/MS_map_MIP_opt.png?raw=true "A MIP-generated map of MS/county with one Black-majority and diameter of 6")   |  ![](readme_images/short_bursts_opt.png?raw=true "A GerryChain-generated map of MS/county with one Black-majority district and diameter of 7")
 
 # Recent News
 
