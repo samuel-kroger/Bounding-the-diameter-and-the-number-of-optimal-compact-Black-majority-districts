@@ -3,6 +3,12 @@ This GitHub repository contains all the code, data, and results used in the pape
 
 This paper proposes mixed integer programming (MIP) formulations and techniques to explore the maximum number of Black-majority congressional districts for multiple states of the United States. Furthermore, we generalize the diameter-based compactness criterion of Garfinkel and Nemhauser (*Management Science*, 1970) and provide a framework for optimizers to capture compactness in constraints rather than the objective function. To alleviate the solving process, we propose fixing procedures and symmetry-breaking constraints. Our proposed MIP formulations provide (i) an upper bound on the number of Black-majority districts and (ii) lower bounds for the diameter of districts. We finally run a state-of-the-art districting package, GerryChain, to provide feasible bounds for the maximum number of Black-majority districts. This provides the best-known existing optimality gap that can be closed by both districters and optimizers in the future. 
 
+The following figures show two county-level maps of MS that are obtained by our proposed MIP formulation (left) and 10,000 iterations of Gerry Chain's short bursts module (right).
+
+A MIP-generated map of MS/county with one Black-majority and diameter of 6             |  A GerryChain-generated map of MS/county with one Black-majority district and diameter of 7
+:-------------------------:|:-------------------------:
+![](readme_images/karate_s2.png?raw=true "a minimum 2-club partition of the karate graph")   |  ![](readme_images/karate_s3.png?raw=true "a minimum 3-club partition of the karate graph")
+
 # Recent News
 
 Twenty-eight percent of the population in Alabama is Black.
