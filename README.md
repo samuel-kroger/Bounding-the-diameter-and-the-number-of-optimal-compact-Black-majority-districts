@@ -9,6 +9,11 @@ A MIP-generated map of MS/county with one Black-majority and diameter of 6      
 :-------------------------:|:-------------------------:
 ![](readme_images/MS_map_MIP_opt.png?raw=true "A MIP-generated map of MS/county with one Black-majority and diameter of 6")   |  ![](readme_images/short_bursts_opt.png?raw=true "A GerryChain-generated map of MS/county with one Black-majority district and diameter of 7")
 
+# Requirements
+
+To run the code, you will need installations of [Gurobi](https://www.gurobi.com/) and [GerryChain](https://gerrychain.readthedocs.io/en/latest/).
+
+The input data is provided by [Daryl DeFord](https://www.math.wsu.edu/faculty/ddeford/).
 
 # How to run the code yourself?
 
