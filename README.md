@@ -17,7 +17,7 @@ The input data is provided by [Daryl DeFord](https://www.math.wsu.edu/faculty/dd
 
 # How to run the code yourself?
 
-All of the code works off running comp_experiment.py and can be excuted with the following line:
+All of the code works off running comp_experiment.py and can be executed with the following line:
 ```
 C:\src\comp_expermient.py
 ```
