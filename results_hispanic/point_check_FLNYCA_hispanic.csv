@@ -1,0 +1,6 @@
+State, parcel, n, m, k_m, s*, status, time, certified_by 
+FL,tract,5160,14099,1,>=11,Unknown,790.11,timeout at u_s
+NY,tract,5411,14844,1,[13,20],Bracketed,910.74,heuristic
+NY,tract,5411,14844,2,[13,20],Bracketed,1151.83,heuristic
+NY,tract,5411,14844,3,>=13,Unknown,520.51,timeout at u_s
+CA,tract,9129,24980,1,>=11,Unknown,539.17,timeout at u_s

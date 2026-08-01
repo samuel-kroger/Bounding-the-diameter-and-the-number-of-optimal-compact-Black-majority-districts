@@ -1,4 +1,4 @@
-14.842092037200928 
+25.561920881271362 
 0 neutr
 1 neutr
 2 neutr
@@ -1197,7 +1197,7 @@
 1195 neutr
 1196 neutr
 1197 neutr
-1198 neutr
+1198 minor
 1199 neutr
 1200 neutr
 1201 neutr
@@ -1253,8 +1253,8 @@
 1251 neutr
 1252 neutr
 1253 neutr
-1254 neutr
-1255 neutr
+1254 minor
+1255 minor
 1256 neutr
 1257 neutr
 1258 neutr
@@ -1676,7 +1676,7 @@
 1674 neutr
 1675 neutr
 1676 neutr
-1677 neutr
+1677 minor
 1678 neutr
 1679 neutr
 1680 neutr
@@ -2766,7 +2766,7 @@
 2764 neutr
 2765 neutr
 2766 neutr
-2767 neutr
+2767 minor
 2768 neutr
 2769 neutr
 2770 neutr
@@ -2840,8 +2840,8 @@
 2838 neutr
 2839 neutr
 2840 neutr
-2841 neutr
-2842 neutr
+2841 minor
+2842 minor
 2843 neutr
 2844 neutr
 2845 neutr
@@ -2855,13 +2855,13 @@
 2853 neutr
 2854 neutr
 2855 neutr
-2856 neutr
-2857 neutr
+2856 minor
+2857 minor
 2858 neutr
 2859 neutr
 2860 neutr
 2861 neutr
-2862 neutr
+2862 minor
 2863 neutr
 2864 neutr
 2865 neutr
@@ -3617,14 +3617,14 @@
 3615 neutr
 3616 neutr
 3617 neutr
-3618 neutr
-3619 neutr
+3618 minor
+3619 minor
 3620 minor
 3621 neutr
 3622 minor
 3623 neutr
 3624 minor
-3625 neutr
+3625 minor
 3626 neutr
 3627 neutr
 3628 neutr
@@ -3822,8 +3822,8 @@
 3820 neutr
 3821 neutr
 3822 neutr
-3823 neutr
-3824 neutr
+3823 minor
+3824 minor
 3825 neutr
 3826 neutr
 3827 neutr
@@ -4047,7 +4047,7 @@
 4045 neutr
 4046 neutr
 4047 minor
-4048 neutr
+4048 minor
 4049 neutr
 4050 neutr
 4051 neutr
@@ -4323,8 +4323,8 @@
 4321 neutr
 4322 neutr
 4323 neutr
-4324 neutr
-4325 neutr
+4324 minor
+4325 minor
 4326 neutr
 4327 neutr
 4328 neutr
@@ -4512,10 +4512,10 @@
 4510 neutr
 4511 neutr
 4512 neutr
-4513 neutr
+4513 minor
 4514 minor
-4515 neutr
-4516 neutr
+4515 minor
+4516 minor
 4517 neutr
 4518 neutr
 4519 neutr
@@ -5156,7 +5156,7 @@
 5154 neutr
 5155 neutr
 5156 neutr
-5157 neutr
+5157 minor
 5158 neutr
 5159 neutr
 5160 minor
@@ -5395,8 +5395,8 @@
 5393 neutr
 5394 neutr
 5395 neutr
-5396 neutr
-5397 neutr
+5396 minor
+5397 minor
 5398 neutr
 5399 neutr
 5400 neutr
@@ -6583,7 +6583,7 @@
 6581 neutr
 6582 neutr
 6583 neutr
-6584 neutr
+6584 minor
 6585 neutr
 6586 neutr
 6587 neutr

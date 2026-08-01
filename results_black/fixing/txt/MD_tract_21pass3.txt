@@ -1,4 +1,4 @@
-250.97803497314453 
+708.6385431289673 
 0 neutr
 1 neutr
 2 neutr
@@ -221,7 +221,7 @@
 219 minor
 220 minor
 221 minor
-222 minor
+222 neutr
 223 minor
 224 minor
 225 minor

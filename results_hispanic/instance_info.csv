@@ -1,0 +1,8 @@
+State, parcel, k, n, m, diam, % minority VAP, current s, split parcels, current # minority districts
+NM, county, 3, 33, 78, 7, 44.34,7,9, 0
+NM, tract, 3, 612, 1631, 16, 44.34,19,46, 1
+CO, tract, 8, 1447, 3909, 22, 19.16,22,73, 0
+AZ, tract, 9, 1765, 4593, 24, 26.88,21,141, 2
+NJ, tract, 12, 2181, 6061, 45, 19.72,26,86, 0
+IL, tract, 17, 3265, 8728, 52, 16.20,40,545, 1
+TX, tract, 38, 6896, 18554, 49, 36.16,37,805, 8

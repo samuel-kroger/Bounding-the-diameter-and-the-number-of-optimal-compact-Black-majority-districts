@@ -1,4 +1,4 @@
-245.96431493759155 
+701.3522837162018 
 0 neutr
 1 neutr
 2 neutr
@@ -613,7 +613,7 @@
 611 neutr
 612 neutr
 613 neutr
-614 minor
+614 neutr
 615 neutr
 616 neutr
 617 neutr

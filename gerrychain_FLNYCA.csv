@@ -1,0 +1,7 @@
+State,parcel level,group,iterations,time,best #MM,s at best,pareto frontier
+CA,tract,black,10000,44021.86,0,20,(20|0)
+CA,tract,hispanic,10000,44056.39,14,21,(21|14) (20|11)
+FL,tract,black,10000,27721.65,0,18,(18|0)
+FL,tract,hispanic,10000,27634.37,5,18,(18|5)
+NY,tract,black,10000,33420.94,2,21,(21|2)
+NY,tract,hispanic,10000,32648.87,2,21,(21|2)

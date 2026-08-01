@@ -1,4 +1,4 @@
-0.3503849506378174 
+1.0584545135498047 
 0 neutr
 1 neutr
 2 neutr
@@ -8,7 +8,7 @@
 6 neutr
 7 neutr
 8 neutr
-9 neutr
+9 minor
 10 neutr
 11 neutr
 12 neutr
@@ -16,9 +16,9 @@
 14 neutr
 15 neutr
 16 neutr
-17 neutr
+17 minor
 18 neutr
-19 neutr
+19 minor
 20 neutr
 21 neutr
 22 neutr
@@ -187,7 +187,7 @@
 185 neutr
 186 neutr
 187 neutr
-188 neutr
+188 minor
 189 neutr
 190 neutr
 191 neutr
@@ -605,7 +605,7 @@
 603 neutr
 604 neutr
 605 neutr
-606 neutr
+606 minor
 607 neutr
 608 neutr
 609 neutr
@@ -613,15 +613,15 @@
 611 neutr
 612 neutr
 613 neutr
-614 neutr
+614 minor
 615 neutr
 616 neutr
 617 neutr
 618 neutr
 619 neutr
-620 neutr
-621 neutr
-622 neutr
+620 minor
+621 minor
+622 minor
 623 neutr
 624 neutr
 625 neutr
@@ -652,7 +652,7 @@
 650 neutr
 651 neutr
 652 neutr
-653 neutr
+653 minor
 654 neutr
 655 neutr
 656 neutr

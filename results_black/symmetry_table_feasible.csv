@@ -1,0 +1,5 @@
+State, parcel level, k, n, m, s, obj_wo_symmetry, bound_wo_symmetry, gap_wo_symmetry(%), time_wo_symmetry, obj_w_symmetry, bound_w_symmetry, gap_w_symmetry(%), time_w_symmetry, gap_improvement(pp), 
+MS,county,4,82,202,6,1,1.00,0.00,29.41,1,1.00,0.00,11.71,0.00, 
+MS,tract,4,878,2378,16,no incumbent,2.00,NA,3625.22,no incumbent,2.00,NA,3623.31,NA, 
+SC,tract,7,1323,3677,16,no incumbent,2.00,NA,3629.43,no incumbent,2.00,NA,3657.24,NA, 
+LA,tract,6,1388,3861,33,no incumbent,3.00,NA,3623.27,no incumbent,3.00,NA,3626.54,NA, 

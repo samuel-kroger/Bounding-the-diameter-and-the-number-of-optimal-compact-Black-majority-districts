@@ -1,4 +1,4 @@
-14.156603813171387 
+8.021423578262329 
 0 minor
 1 minor
 2 minor
@@ -1307,7 +1307,7 @@
 1305 minor
 1306 minor
 1307 neutr
-1308 minor
+1308 neutr
 1309 neutr
 1310 neutr
 1311 minor

@@ -1,4 +1,4 @@
-222.90875697135925 
+308.49401593208313 
 0 neutr
 1 neutr
 2 neutr
@@ -457,8 +457,8 @@
 455 neutr
 456 neutr
 457 neutr
-458 minor
-459 minor
+458 neutr
+459 neutr
 460 minor
 461 neutr
 462 neutr
@@ -466,7 +466,7 @@
 464 neutr
 465 minor
 466 minor
-467 minor
+467 neutr
 468 minor
 469 neutr
 470 neutr
@@ -528,7 +528,7 @@
 526 neutr
 527 neutr
 528 minor
-529 minor
+529 neutr
 530 minor
 531 neutr
 532 neutr
@@ -965,12 +965,12 @@
 963 neutr
 964 neutr
 965 neutr
-966 minor
+966 neutr
 967 neutr
 968 neutr
 969 minor
-970 minor
-971 minor
+970 neutr
+971 neutr
 972 neutr
 973 minor
 974 minor

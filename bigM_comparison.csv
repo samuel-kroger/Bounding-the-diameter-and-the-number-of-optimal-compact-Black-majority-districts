@@ -1,0 +1,7 @@
+state,level,n,k,formulation,root_LP,IP_opt,nodes,time_s,gap
+MS,county,82,4,separate-variable (ours),2.049,2.0,1,0.1,0.0
+MS,county,82,4,big-M,3.861,2.0,1,0.0,0.0
+AL,county,67,7,separate-variable (ours),1.303,1.0,1,0.0,0.0
+AL,county,67,7,big-M,6.759,1.0,1,0.0,0.0
+LA,county,64,6,separate-variable (ours),1.275,1.0,1,0.0,0.0
+LA,county,64,6,big-M,5.812,1.0,1,0.0,0.0

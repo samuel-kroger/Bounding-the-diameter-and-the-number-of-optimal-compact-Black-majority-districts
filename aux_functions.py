@@ -5,6 +5,7 @@ import time
 import os
 import csv
 from gurobipy import GRB
+from fast_graph import CSRGraph, separate_compactness, separate_contiguity, power_edges, far_pairs, can_fix_minority, check_feasible_plan, greedy_power_independent_set
 
 def get_state_codes():
 	return  {
@@ -64,7 +65,10 @@ def stabliity_number_callback(model, where):
 	if where == gp.GRB.Callback.MIPNODE:
 		obj = model.cbGet(gp.GRB.Callback.MIPNODE_OBJBST)
 
-		if obj > model._k + 1:
+		# The binary search only needs to know whether alpha(G^s) > k. As soon as
+		# the incumbent independent set exceeds k vertices, that is settled, so we
+		# can stop (previously this waited one step longer, for k+2).
+		if obj > model._k:
 			model.terminate()
 
 
@@ -84,19 +88,42 @@ def s_call_back(m, where):
 def compute_stability_number(method, graph, state, k, s, group):
 	
 	if method == 'read':
-		if os.path.exists('./results_' + group + '/max_independent_set/' + state + '_' + str(s) + '.csv'):
-			with open('./results_' + group + '/max_independent_set/' + state + '_' + str(s) + '.csv') as csvfile:
+		if os.path.exists('./results_' + group + '/max_independent_set/' + state + '_' + str(s) + '_n' + str(graph.number_of_nodes()) + '.csv'):
+			with open('./results_' + group + '/max_independent_set/' + state + '_' + str(s) + '_n' + str(graph.number_of_nodes()) + '.csv') as csvfile:
 				csvreader = csv.reader(csvfile, delimiter=',')
-			
+
 				for row in csvreader:
-					
+					if not row or not row[0].strip():
+						continue   # skip blank lines (Windows csv newline artifacts)
 					res = row[0].strip('][').split(', ')
+					res = [x for x in res if x.strip() != '']
 					max_independent_set = [int(i) for i in res]
 			
 			return max_independent_set
 			
-	graph = nx.power(graph, s)
+	# Build the conflict graph G^s via fast BFS instead of nx.power(graph, s)
+	# (validated equal in test_power.py). Planar G => m = O(n), so each capped
+	# BFS is O(n) and this avoids materializing the dense power graph.
+	_csr_power = CSRGraph(graph.number_of_nodes(), graph.edges())
 	start_time = time.time()
+
+	# Fast greedy lower bound on alpha(G^s): if greedy already finds an
+	# independent set larger than k, then alpha(G^s) > k is settled and we can
+	# skip building/solving the (possibly huge) max-independent-set MIP entirely.
+	# This short-circuits every small-s step of the binary search; certifying
+	# ">k" costs at most k+1 capped BFS calls.
+	certified, greedy_set = greedy_power_independent_set(_csr_power, s, k)
+	if certified:
+		end_time = time.time()
+		with open('./results_' + group + '/max_independent_set/' + state + '_' + str(s) + '_n' + str(graph.number_of_nodes()) + '.csv', 'w', newline='') as csvfile:
+			writer = csv.writer(csvfile, delimiter=',')
+			writer.writerow([greedy_set, end_time - start_time])
+		print('greedy certified alpha(G^s) > k with', len(greedy_set), 'vertices (skipped MIP)')
+		if method == 'read':
+			return greedy_set
+		return len(greedy_set), greedy_set
+
+	power_graph_edges = power_edges(_csr_power, s)
 
 	m = gp.Model()
 	m._k = k
@@ -109,7 +136,7 @@ def compute_stability_number(method, graph, state, k, s, group):
 	m.setObjective(m._X.sum(), gp.GRB.MAXIMIZE)
 	######REVISIT WITH HAMID
 	#m.addConstr(gp.quicksum(m._X) <= k + 1)
-	m.addConstrs(m._X[i] + m._X[j] <= 1 for (i,j) in graph.edges())
+	m.addConstrs(m._X[i] + m._X[j] <= 1 for (i,j) in power_graph_edges)
 	#for (i, j) in graph.edges():
 	#	conflict_constr = m.addConstr(m._X[i] + m._X[j] <= 1)
 	#	conflict_constr.Lazy = 3
@@ -132,11 +159,19 @@ def compute_stability_number(method, graph, state, k, s, group):
 
 	end_time = time.time()
 
-	with open('./results_' + group + '/max_independent_set/' + state + '_' + str(s) + '.csv', 'w') as csvfile:
+	with open('./results_' + group + '/max_independent_set/' + state + '_' + str(s) + '_n' + str(graph.number_of_nodes()) + '.csv', 'w', newline='') as csvfile:
 		writer = csv.writer(csvfile, delimiter=',')
 		writer.writerow([max_independent_set, end_time - start_time])
-		
+
 	#csvwriter.write([str(max_independent_set), str(end_time - start_time)])
+
+	# 'read' callers (e.g. add_symmetry_constraints) expect ONLY the vertex
+	# list -- the same shape returned on a cache hit above. When the cache file
+	# was missing we computed it here, so return just the list to stay
+	# consistent (previously this returned the (status, set) tuple, which made
+	# the caller treat the objective value as a vertex and crash).
+	if method == 'read':
+		return max_independent_set
 
 	return output_string, max_independent_set
 
@@ -176,7 +211,64 @@ def find_fischetti_separator(DG, component, b, n):
 	return C
 
 
+def _get_csr(m):
+	"""Build and cache the CSR adjacency for m._G once per model (nodes are
+	integers 0..n-1 in the JSON instances)."""
+	csr = getattr(m, '_csr', None)
+	if csr is None:
+		G = m._G
+		n = getattr(m, '_n', None) or G.number_of_nodes()
+		csr = CSRGraph(n, G.edges())
+		m._csr = csr
+	return csr
+
+
 def compactness_callback(m, where):
+	"""Fast length-s separator callback. Detects contiguity/diameter violations
+	and adds the same lazy length-s a,b-separator cuts as compactness_callback_ref,
+	but using array-based BFS (fast_graph) instead of per-call networkx
+	to_directed/diameter/dijkstra. Accepts exactly the same integer solutions."""
+	if where != gp.GRB.Callback.MIPSOL:
+		return
+
+	selector = m._option
+	s = m._s
+	k = m._k
+	district_vars_exist = m._district_vars_exist
+	csr = _get_csr(m)
+
+	if selector != 'majority':
+		xval = m.cbGetSolution(m._X)
+		minority_range = m._minority_district_range
+	else:
+		xval = None
+		minority_range = range(0)
+	if selector != 'minority':
+		yval = m.cbGetSolution(m._Y)
+		majority_range = m._majority_district_range
+	else:
+		yval = None
+		majority_range = range(0)
+
+	cuts = separate_compactness(csr, s, selector, xval, yval,
+	                            minority_range, majority_range, k)
+
+	for (a, b, minC) in cuts:
+		if selector != 'majority':
+			for index in minority_range:
+				if district_vars_exist:
+					m.cbLazy(m._X[a, index] + m._X[b, index] <= m._Z[index] + gp.quicksum(m._X[c, index] for c in minC))
+				else:
+					m.cbLazy(m._X[a, index] + m._X[b, index] <= 1 + gp.quicksum(m._X[c, index] for c in minC))
+		if selector != 'minority':
+			for index in majority_range:
+				if district_vars_exist:
+					m.cbLazy(m._Y[a, index] + m._Y[b, index] <= m._W[index] + gp.quicksum(m._Y[c, index] for c in minC))
+				else:
+					m.cbLazy(m._Y[a, index] + m._Y[b, index] <= 1 + gp.quicksum(m._Y[c, index] for c in minC))
+
+
+def compactness_callback_ref(m, where):
 
 	if where == gp.GRB.Callback.MIPSOL:
 
@@ -368,6 +460,49 @@ def compactness_callback(m, where):
 
 
 def continuous_ONLY_callback(m, where):
+	"""Fast contiguity-only callback (no diameter bound). Adds the same
+	Fischetti a,b-separator cuts as continuous_ONLY_callback_ref using
+	array-based BFS."""
+	if where != gp.GRB.Callback.MIPSOL:
+		return
+
+	selector = m._option
+	k = m._k
+	district_vars_exist = m._district_vars_exist
+	csr = _get_csr(m)
+
+	if selector != 'majority':
+		xval = m.cbGetSolution(m._X)
+		minority_range = m._minority_district_range
+	else:
+		xval = None
+		minority_range = range(0)
+	if selector != 'minority':
+		yval = m.cbGetSolution(m._Y)
+		majority_range = m._majority_district_range
+	else:
+		yval = None
+		majority_range = range(0)
+
+	cuts = separate_contiguity(csr, selector, xval, yval,
+	                           minority_range, majority_range, k)
+
+	for (a, b, C) in cuts:
+		if selector != 'majority':
+			for index in minority_range:
+				if district_vars_exist:
+					m.cbLazy(m._X[a, index] + m._X[b, index] <= m._Z[index] + gp.quicksum(m._X[c, index] for c in C))
+				else:
+					m.cbLazy(m._X[a, index] + m._X[b, index] <= 1 + gp.quicksum(m._X[c, index] for c in C))
+		if selector != 'minority':
+			for index in majority_range:
+				if district_vars_exist:
+					m.cbLazy(m._Y[a, index] + m._Y[b, index] <= m._W[index] + gp.quicksum(m._Y[c, index] for c in C))
+				else:
+					m.cbLazy(m._Y[a, index] + m._Y[b, index] <= 1 + gp.quicksum(m._Y[c, index] for c in C))
+
+
+def continuous_ONLY_callback_ref(m, where):
 
 	if where == gp.GRB.Callback.MIPSOL:
 
@@ -995,3 +1130,5 @@ def report_metrics(G, districts, minority=None, verbose=False):
     avepp = round( average_polsby_popper(G, districts, verbose=verbose), 4)
     print("-> average Polsby-Popper score of",avepp)
     return
+
+# end of aux_functions.py

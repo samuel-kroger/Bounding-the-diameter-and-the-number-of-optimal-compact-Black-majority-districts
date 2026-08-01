@@ -1,4 +1,4 @@
-131.9624240398407 
+41.03283429145813 
 0 minor
 1 minor
 2 minor
@@ -47,7 +47,7 @@
 45 minor
 46 minor
 47 minor
-48 minor
+48 neutr
 49 minor
 50 minor
 51 minor
@@ -60,8 +60,8 @@
 58 minor
 59 minor
 60 minor
-61 minor
-62 minor
+61 neutr
+62 neutr
 63 neutr
 64 minor
 65 minor
@@ -192,13 +192,13 @@
 190 minor
 191 minor
 192 minor
-193 minor
-194 minor
+193 neutr
+194 neutr
 195 minor
 196 minor
 197 minor
 198 neutr
-199 minor
+199 neutr
 200 minor
 201 neutr
 202 neutr
@@ -243,7 +243,7 @@
 241 neutr
 242 neutr
 243 neutr
-244 minor
+244 neutr
 245 neutr
 246 neutr
 247 minor
@@ -334,9 +334,9 @@
 332 neutr
 333 neutr
 334 neutr
-335 minor
+335 neutr
 336 neutr
-337 minor
+337 neutr
 338 neutr
 339 minor
 340 minor
@@ -371,7 +371,7 @@
 369 neutr
 370 neutr
 371 minor
-372 minor
+372 neutr
 373 neutr
 374 neutr
 375 neutr
@@ -403,12 +403,12 @@
 401 neutr
 402 neutr
 403 neutr
-404 minor
+404 neutr
 405 minor
-406 minor
+406 neutr
 407 minor
 408 minor
-409 minor
+409 neutr
 410 minor
 411 minor
 412 minor
@@ -434,8 +434,8 @@
 432 neutr
 433 neutr
 434 neutr
-435 minor
-436 minor
+435 neutr
+436 neutr
 437 minor
 438 neutr
 439 minor
@@ -801,7 +801,7 @@
 799 neutr
 800 neutr
 801 minor
-802 minor
+802 neutr
 803 neutr
 804 neutr
 805 minor
@@ -819,7 +819,7 @@
 817 minor
 818 minor
 819 minor
-820 minor
+820 neutr
 821 minor
 822 minor
 823 minor
@@ -869,7 +869,7 @@
 867 neutr
 868 neutr
 869 minor
-870 minor
+870 neutr
 871 neutr
 872 neutr
 873 neutr
@@ -1206,11 +1206,11 @@
 1204 neutr
 1205 neutr
 1206 neutr
-1207 minor
+1207 neutr
 1208 neutr
 1209 minor
 1210 minor
-1211 minor
+1211 neutr
 1212 minor
 1213 minor
 1214 neutr
@@ -1436,7 +1436,7 @@
 1434 minor
 1435 minor
 1436 neutr
-1437 minor
+1437 neutr
 1438 minor
 1439 minor
 1440 minor
@@ -1507,8 +1507,8 @@
 1505 minor
 1506 minor
 1507 minor
-1508 minor
-1509 minor
+1508 neutr
+1509 neutr
 1510 neutr
 1511 neutr
 1512 neutr
@@ -1677,8 +1677,8 @@
 1675 minor
 1676 minor
 1677 minor
-1678 minor
-1679 minor
+1678 neutr
+1679 neutr
 1680 neutr
 1681 neutr
 1682 neutr

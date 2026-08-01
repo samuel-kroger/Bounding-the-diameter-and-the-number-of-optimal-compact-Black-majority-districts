@@ -1,4 +1,4 @@
-21.02408003807068 
+7.977370262145996 
 0 minor
 1 minor
 2 minor
@@ -327,9 +327,9 @@
 325 minor
 326 neutr
 327 neutr
-328 minor
-329 minor
-330 minor
+328 neutr
+329 neutr
+330 neutr
 331 minor
 332 minor
 333 minor
@@ -632,7 +632,7 @@
 630 neutr
 631 neutr
 632 neutr
-633 minor
+633 neutr
 634 neutr
 635 neutr
 636 neutr
@@ -1407,10 +1407,10 @@
 1405 minor
 1406 minor
 1407 minor
-1408 minor
-1409 minor
+1408 neutr
+1409 neutr
 1410 neutr
-1411 minor
+1411 neutr
 1412 minor
 1413 minor
 1414 minor

@@ -1,4 +1,4 @@
-31.56715488433838 
+19.088696718215942 
 0 neutr
 1 neutr
 2 neutr
@@ -196,7 +196,7 @@
 194 neutr
 195 neutr
 196 neutr
-197 neutr
+197 minor
 198 neutr
 199 neutr
 200 neutr
@@ -749,7 +749,7 @@
 747 neutr
 748 neutr
 749 neutr
-750 neutr
+750 minor
 751 neutr
 752 neutr
 753 neutr

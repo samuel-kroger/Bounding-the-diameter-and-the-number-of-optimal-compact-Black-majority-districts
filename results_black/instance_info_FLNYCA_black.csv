@@ -1,0 +1,4 @@
+State, parcel, k, n, m, diam, % minority VAP, current s, split parcels, current # minority districts
+FL, tract, 28, 5160, 14099, 40, 15.54,31,316, 0
+NY, tract, 26, 5411, 14844, 72, 16.79,24,292, 0
+CA, tract, 52, 9129, 24980, 39, 6.81,29,906, 0

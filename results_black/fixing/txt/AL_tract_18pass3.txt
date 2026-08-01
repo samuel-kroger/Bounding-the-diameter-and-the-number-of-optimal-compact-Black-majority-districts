@@ -1,4 +1,4 @@
-236.55016207695007 
+209.50322461128235 
 0 neutr
 1 neutr
 2 neutr
@@ -379,7 +379,7 @@
 377 neutr
 378 neutr
 379 neutr
-380 minor
+380 neutr
 381 neutr
 382 neutr
 383 neutr

@@ -1,4 +1,4 @@
-0.012504100799560547 
+0.019196271896362305 
 0 neutr
 1 neutr
 2 minor
@@ -6,8 +6,8 @@
 4 neutr
 5 neutr
 6 neutr
-7 neutr
-8 neutr
+7 minor
+8 minor
 9 neutr
 10 neutr
 11 neutr
@@ -26,7 +26,7 @@
 24 neutr
 25 neutr
 26 neutr
-27 neutr
+27 minor
 28 neutr
 29 neutr
 30 minor

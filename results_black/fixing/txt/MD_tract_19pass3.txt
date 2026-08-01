@@ -1,4 +1,4 @@
-243.56670093536377 
+275.34503746032715 
 0 neutr
 1 neutr
 2 neutr
@@ -543,7 +543,7 @@
 541 neutr
 542 neutr
 543 neutr
-544 minor
+544 neutr
 545 neutr
 546 neutr
 547 neutr
@@ -614,7 +614,7 @@
 612 neutr
 613 neutr
 614 minor
-615 minor
+615 neutr
 616 neutr
 617 neutr
 618 neutr

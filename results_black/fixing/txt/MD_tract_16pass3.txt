@@ -1,4 +1,4 @@
-193.14533305168152 
+255.3100311756134 
 0 neutr
 1 neutr
 2 neutr
@@ -752,7 +752,7 @@
 750 neutr
 751 neutr
 752 neutr
-753 minor
+753 neutr
 754 neutr
 755 neutr
 756 neutr
@@ -966,7 +966,7 @@
 964 neutr
 965 neutr
 966 minor
-967 minor
+967 neutr
 968 neutr
 969 minor
 970 minor
@@ -1096,7 +1096,7 @@
 1094 neutr
 1095 neutr
 1096 neutr
-1097 minor
+1097 neutr
 1098 neutr
 1099 neutr
 1100 neutr

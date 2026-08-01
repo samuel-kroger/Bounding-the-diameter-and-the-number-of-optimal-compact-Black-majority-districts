@@ -1,4 +1,4 @@
-168.18212890625 
+266.5465817451477 
 0 neutr
 1 neutr
 2 neutr
@@ -1039,7 +1039,7 @@
 1037 neutr
 1038 neutr
 1039 neutr
-1040 minor
+1040 neutr
 1041 neutr
 1042 neutr
 1043 neutr
