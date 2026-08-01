@@ -1,4 +1,4 @@
-318.4823350906372 
+162.84919548034668 
 0 minor
 1 minor
 2 minor
@@ -71,8 +71,8 @@
 69 neutr
 70 minor
 71 neutr
-72 minor
-73 minor
+72 neutr
+73 neutr
 74 neutr
 75 neutr
 76 minor
@@ -81,12 +81,12 @@
 79 minor
 80 minor
 81 minor
-82 minor
+82 neutr
 83 neutr
 84 neutr
 85 minor
 86 minor
-87 minor
+87 neutr
 88 neutr
 89 minor
 90 neutr
@@ -157,7 +157,7 @@
 155 neutr
 156 neutr
 157 neutr
-158 minor
+158 neutr
 159 neutr
 160 neutr
 161 minor
@@ -2168,8 +2168,8 @@
 2166 minor
 2167 minor
 2168 minor
-2169 minor
-2170 minor
+2169 neutr
+2170 neutr
 2171 minor
 2172 minor
 2173 minor

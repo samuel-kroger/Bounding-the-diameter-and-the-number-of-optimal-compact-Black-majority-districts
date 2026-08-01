@@ -1,4 +1,4 @@
-193.66876792907715 
+155.45754027366638 
 0 neutr
 1 neutr
 2 neutr
@@ -37,7 +37,7 @@
 35 neutr
 36 neutr
 37 minor
-38 minor
+38 neutr
 39 neutr
 40 neutr
 41 neutr
@@ -840,14 +840,14 @@
 838 neutr
 839 neutr
 840 neutr
-841 minor
+841 neutr
 842 minor
 843 minor
-844 minor
+844 neutr
 845 neutr
 846 minor
 847 minor
-848 minor
+848 neutr
 849 minor
 850 neutr
 851 neutr
@@ -875,7 +875,7 @@
 873 neutr
 874 neutr
 875 minor
-876 minor
+876 neutr
 877 minor
 878 neutr
 879 minor

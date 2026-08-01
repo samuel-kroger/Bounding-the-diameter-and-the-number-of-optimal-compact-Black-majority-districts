@@ -1,4 +1,4 @@
-161.14720225334167 
+122.7529559135437 
 0 minor
 1 minor
 2 neutr
@@ -129,7 +129,7 @@
 127 minor
 128 neutr
 129 neutr
-130 minor
+130 neutr
 131 minor
 132 minor
 133 minor
@@ -309,14 +309,14 @@
 307 minor
 308 minor
 309 minor
-310 minor
+310 neutr
 311 minor
 312 minor
 313 minor
 314 minor
-315 minor
+315 neutr
 316 minor
-317 minor
+317 neutr
 318 neutr
 319 minor
 320 minor
@@ -399,7 +399,7 @@
 397 minor
 398 minor
 399 minor
-400 minor
+400 neutr
 401 neutr
 402 neutr
 403 neutr
@@ -411,8 +411,8 @@
 409 neutr
 410 minor
 411 neutr
-412 minor
-413 minor
+412 neutr
+413 neutr
 414 neutr
 415 neutr
 416 neutr
@@ -466,9 +466,9 @@
 464 minor
 465 minor
 466 minor
-467 minor
-468 minor
-469 minor
+467 neutr
+468 neutr
+469 neutr
 470 minor
 471 minor
 472 minor
@@ -477,7 +477,7 @@
 475 neutr
 476 minor
 477 minor
-478 minor
+478 neutr
 479 neutr
 480 minor
 481 neutr
@@ -521,7 +521,7 @@
 519 minor
 520 minor
 521 minor
-522 minor
+522 neutr
 523 minor
 524 minor
 525 minor
@@ -620,14 +620,14 @@
 618 neutr
 619 neutr
 620 neutr
-621 minor
+621 neutr
 622 neutr
 623 neutr
 624 neutr
 625 neutr
-626 minor
-627 minor
-628 minor
+626 neutr
+627 neutr
+628 neutr
 629 minor
 630 neutr
 631 neutr
@@ -658,7 +658,7 @@
 656 neutr
 657 neutr
 658 minor
-659 minor
+659 neutr
 660 neutr
 661 neutr
 662 neutr
@@ -705,7 +705,7 @@
 703 minor
 704 minor
 705 minor
-706 minor
+706 neutr
 707 minor
 708 minor
 709 minor
@@ -805,7 +805,7 @@
 803 neutr
 804 neutr
 805 neutr
-806 minor
+806 neutr
 807 neutr
 808 neutr
 809 neutr
@@ -822,7 +822,7 @@
 820 neutr
 821 neutr
 822 minor
-823 minor
+823 neutr
 824 neutr
 825 neutr
 826 neutr
@@ -1065,11 +1065,11 @@
 1063 minor
 1064 minor
 1065 minor
-1066 minor
+1066 neutr
 1067 minor
 1068 minor
 1069 minor
-1070 minor
+1070 neutr
 1071 neutr
 1072 neutr
 1073 neutr
@@ -1594,9 +1594,9 @@
 1592 minor
 1593 minor
 1594 minor
-1595 minor
+1595 neutr
 1596 minor
-1597 minor
+1597 neutr
 1598 neutr
 1599 minor
 1600 neutr
@@ -1658,8 +1658,8 @@
 1656 neutr
 1657 neutr
 1658 minor
-1659 minor
-1660 minor
+1659 neutr
+1660 neutr
 1661 neutr
 1662 neutr
 1663 neutr
@@ -1672,7 +1672,7 @@
 1670 minor
 1671 minor
 1672 minor
-1673 minor
+1673 neutr
 1674 minor
 1675 neutr
 1676 neutr

@@ -1,4 +1,4 @@
-230.7194390296936 
+222.88564538955688 
 0 neutr
 1 neutr
 2 neutr
@@ -654,7 +654,7 @@
 652 neutr
 653 neutr
 654 neutr
-655 minor
+655 neutr
 656 neutr
 657 neutr
 658 neutr

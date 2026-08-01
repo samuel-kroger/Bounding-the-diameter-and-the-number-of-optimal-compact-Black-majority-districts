@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+
+# Run logs (regenerated every run, and they contain absolute local paths)
+*.log
+gc_log_*.txt
+gc_error_*.log
+
+# Editor / OS cruft
+.DS_Store
+*.bak
+*.preFLNY
+
+# Original (pre-repair) copies of the tract graphs kept by repair_connectivity.py.
+# The repaired graphs are reproduced by running repair_connectivity.py, so
+# neither the backups nor the rewritten graphs belong in version control.
+raw_data/**/*.ORIGINAL.json
+
+# Scratch outputs from unit tests, not results
+gerrychain_TT_*.csv
+gerrychain_UU_*.csv
+gerrychain_VV_*.csv
+gerrychain_ZZ_*.csv
+results_*/gerrychain/TT_*.pckl
+A1_sanity.xlsx
+
+# Safety copies taken while reformatting result files mid-revision
+*_OLDFORMAT_backup.csv
+*_prefix_backup.csv
+*_preclean_backup.csv
+
+# The one-off helper that set this repo up; not part of the pipeline
+push_revision.ps1

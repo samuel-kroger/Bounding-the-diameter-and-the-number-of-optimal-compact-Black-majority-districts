@@ -1,4 +1,4 @@
-0.9651410579681396 
+3.390357732772827 
 0 neutr
 1 neutr
 2 neutr
@@ -176,12 +176,12 @@
 174 neutr
 175 neutr
 176 neutr
-177 neutr
+177 minor
 178 neutr
-179 neutr
-180 neutr
-181 neutr
-182 neutr
+179 minor
+180 minor
+181 minor
+182 minor
 183 neutr
 184 neutr
 185 neutr
@@ -189,19 +189,19 @@
 187 neutr
 188 neutr
 189 neutr
-190 neutr
+190 minor
 191 neutr
 192 neutr
 193 neutr
 194 neutr
-195 neutr
-196 neutr
-197 neutr
+195 minor
+196 minor
+197 minor
 198 neutr
-199 neutr
-200 neutr
-201 neutr
-202 neutr
+199 minor
+200 minor
+201 minor
+202 minor
 203 neutr
 204 neutr
 205 neutr
@@ -434,7 +434,7 @@
 432 neutr
 433 neutr
 434 neutr
-435 neutr
+435 minor
 436 neutr
 437 neutr
 438 neutr
@@ -446,7 +446,7 @@
 444 neutr
 445 neutr
 446 neutr
-447 neutr
+447 minor
 448 neutr
 449 neutr
 450 neutr
@@ -633,7 +633,7 @@
 631 neutr
 632 neutr
 633 neutr
-634 neutr
+634 minor
 635 neutr
 636 neutr
 637 neutr
@@ -652,7 +652,7 @@
 650 neutr
 651 neutr
 652 neutr
-653 neutr
+653 minor
 654 neutr
 655 minor
 656 neutr
@@ -674,7 +674,7 @@
 672 neutr
 673 neutr
 674 neutr
-675 neutr
+675 minor
 676 neutr
 677 neutr
 678 neutr
@@ -713,8 +713,8 @@
 711 neutr
 712 neutr
 713 neutr
-714 neutr
-715 neutr
+714 minor
+715 minor
 716 neutr
 717 neutr
 718 neutr
@@ -722,7 +722,7 @@
 720 neutr
 721 neutr
 722 neutr
-723 neutr
+723 minor
 724 neutr
 725 neutr
 726 neutr
@@ -731,7 +731,7 @@
 729 neutr
 730 neutr
 731 neutr
-732 neutr
+732 minor
 733 neutr
 734 neutr
 735 neutr
@@ -747,7 +747,7 @@
 745 neutr
 746 neutr
 747 neutr
-748 neutr
+748 minor
 749 neutr
 750 neutr
 751 neutr
@@ -810,7 +810,7 @@
 808 neutr
 809 neutr
 810 neutr
-811 neutr
+811 minor
 812 neutr
 813 neutr
 814 neutr
@@ -1030,8 +1030,8 @@
 1028 neutr
 1029 neutr
 1030 neutr
-1031 neutr
-1032 neutr
+1031 minor
+1032 minor
 1033 neutr
 1034 neutr
 1035 neutr
@@ -1039,9 +1039,9 @@
 1037 neutr
 1038 neutr
 1039 neutr
-1040 neutr
-1041 neutr
-1042 neutr
+1040 minor
+1041 minor
+1042 minor
 1043 neutr
 1044 neutr
 1045 neutr

@@ -1,1 +1,18 @@
-State, parcel, k, n, m, diam, % Black pop, current s, split parcels, current # minority districts
+State, parcel, k, n, m, diam, % minority VAP, current s, split parcels, current # minority districts
+MS, county, 4, 82, 202, 13, 36.14,9,4, 1
+MS, tract, 4, 878, 2378, 32, 36.14,20,19, 1
+LA, tract, 6, 1388, 3861, 32, 31.25,28,111, 1
+SC, tract, 7, 1323, 3677, 32, 25.28,25,80, 0
+AL, tract, 7, 1437, 4014, 34, 25.90,26,68, 1
+MD, tract, 8, 1475, 3993, 42, 31.01,25,77, 2
+MO, tract, 8, 1654, 4488, 38, 11.77,25,87, 0
+TN, tract, 9, 1701, 4691, 53, 16.06,21,102, 1
+VA, tract, 11, 2198, 6064, 45, 19.88,30,62, 0
+NJ, tract, 12, 2181, 6061, 45, 14.53,26,86, 0
+MI, tract, 13, 3017, 7989, 41, 14.04,25,58, 0
+NC, tract, 14, 2672, 7422, 52, 21.37,21,114, 0
+GA, tract, 14, 2796, 7762, 43, 31.73,23,163, 3
+OH, tract, 15, 3168, 8747, 44, 12.91,25,128, 0
+IL, tract, 17, 3265, 8728, 52, 14.68,40,545, 0
+PA, tract, 17, 3446, 9641, 59, 11.48,25,84, 0
+TX, tract, 38, 6896, 18554, 49, 12.98,37,805, 0

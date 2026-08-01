@@ -16,17 +16,42 @@ import pickle
 import numpy as np
 
 from gurobipy import GRB
-from gerrychain import MarkovChain
-from gerrychain import (GeographicPartition, Graph, updaters, constraints, accept, proposals)
-
-from gerrychain import Partition
-from gerrychain import constraints as constraints_class
-from gerrychain.optimization import Gingleator
-from gerrychain.tree import recursive_tree_part
-from gerrychain.proposals import recom
+try:
+	from gerrychain import MarkovChain
+	from gerrychain import (GeographicPartition, Graph, updaters, constraints, accept, proposals)
+	from gerrychain import Partition
+	from gerrychain import constraints as constraints_class
+	from gerrychain.optimization import Gingleator
+	from gerrychain.tree import recursive_tree_part
+	from gerrychain.proposals import recom
+	_HAS_GERRYCHAIN = True
+except ImportError:
+	# gerrychain is only used by the GerryChain heuristic methods and for graph
+	# loading. The MIP formulations and the A1 benchmark do not need it.
+	_HAS_GERRYCHAIN = False
+	Graph = None
 from functools import partial
 from matplotlib.colors import LinearSegmentedColormap
 from aux_functions import *
+
+
+def load_graph_json(path):
+	"""Load a contiguity graph from a JSON adjacency file as a networkx graph.
+	Uses gerrychain's Graph.from_json when available (original behavior, so the
+	GerryChain methods keep working); otherwise falls back to plain networkx so
+	the MIP formulations and the A1 benchmark run without gerrychain installed."""
+	if _HAS_GERRYCHAIN:
+		return Graph.from_json(path)
+	with open(path) as f:
+		data = json.load(f)
+	return nx.adjacency_graph(data, multigraph=False)
+
+
+# Module-level lookups used by problem_instance. These were previously defined
+# only inside the __main__ block, so importing this module (e.g., from the A1
+# benchmark driver) left them undefined; define them here so import works.
+state_codes = get_state_codes()
+congressional_districts = get_congressional_codes()
 pandas.options.mode.chained_assignment = None
 
 
@@ -40,6 +65,9 @@ class problem_instance(object):
 		self.group = group
 
 		self.error_message = ''
+		# Set up-front so that a labeling_model(..., parcel_fixing=False, ...) run
+		# does not dereference an unset attribute in add_lazy_distance_cuts.
+		self.minority_fixings = []
 		self.f = 0.5
 		
 		self.population_deviation = .01
@@ -54,7 +82,7 @@ class problem_instance(object):
 
 		print('Attempting to read in json data')
 		if os.path.exists('./raw_data/' + parcel_level + '/json/' + state + '_' + parcel_level_plural + '.json'):
-			self.G = Graph.from_json('./raw_data/' + parcel_level + '/json/' + state + '_' + parcel_level_plural + '.json')
+			self.G = load_graph_json('./raw_data/' + parcel_level + '/json/' + state + '_' + parcel_level_plural + '.json')
 
 			f = open('./raw_data/' + parcel_level + '/json/' + state + '_' + parcel_level_plural + '.json')
 			self.parcel_data = json.load(f)
@@ -69,8 +97,23 @@ class problem_instance(object):
 
 
 			if self.group == 'black':
-				self.minority_population = [self.parcel_data['nodes'][i]['P0030004'] for i in self.G.nodes()]
+				# ANY-PART Black VAP (alone OR in combination) -- the VRA/Gingles
+				# standard, matching Belotti et al.'s carve definition so the
+				# majority-minority comparison is apples-to-apples. (Previously
+				# this used P0030004 = Black alone.)
+				_black_anypart = [
+					'P0030004', 'P0030011', 'P0030016', 'P0030017', 'P0030018',
+					'P0030019', 'P0030027', 'P0030028', 'P0030029', 'P0030030',
+					'P0030037', 'P0030038', 'P0030039', 'P0030040', 'P0030041',
+					'P0030042', 'P0030048', 'P0030049', 'P0030050', 'P0030051',
+					'P0030052', 'P0030053', 'P0030058', 'P0030059', 'P0030060',
+					'P0030061', 'P0030064', 'P0030065', 'P0030066', 'P0030067',
+					'P0030069', 'P0030071']
+				self.minority_population = [
+					sum(self.parcel_data['nodes'][i][c] for c in _black_anypart)
+					for i in self.G.nodes()]
 			elif self.group == 'hispanic':
+				# Hispanic any-part == Hispanic VAP (single code), unchanged.
 				self.minority_population = [self.parcel_data['nodes'][i]['P0040002'] for i in self.G.nodes()]
 
 
@@ -108,7 +151,14 @@ class problem_instance(object):
 				if os.path.exists('results_' + self.group + '/upper_bound_minority_districts/upper_bound_minority_districts_' + self.state + '_' + self.parcel_level + '.txt'):
 					with open('results_' + self.group + '/upper_bound_minority_districts/upper_bound_minority_districts_' + self.state + '_' + self.parcel_level + '.txt', 'r') as file:
 						for line in file:
-							self.k_minority = int(line)
+							# int(line) fails when a previous run cached a float,
+							# e.g. '33.0' from a time-limited solve that stored a
+							# Gurobi bound rather than a proven integer optimum.
+							# Round through float so an old cache cannot poison
+							# every later step with
+							#   TypeError: 'float' object cannot be interpreted
+							#   as an integer     (from range(self.k_minority))
+							self.k_minority = int(round(float(line.strip())))
 							print('Upper bound on minority districts read in as :', str(self.k_minority))
 
 				else:
@@ -116,6 +166,7 @@ class problem_instance(object):
 						self.minority_district_range = range(self.k)
 						self.k_minority = self.k
 						self.find_upper_bound_minority_districts()
+						self.k_minority = int(round(float(self.k_minority)))
 						doc.write(str(self.k_minority))
 						print('Upper bound on minority districts comupted and stored as :', str(self.k_minority))
 
@@ -195,16 +246,20 @@ class problem_instance(object):
 			if nx.diameter(subgraph) > current_s:
 				current_s = nx.diameter(subgraph)
 		
+		# count majority-minority districts in the enacted plan: a district is MM
+		# when its minority voting-age population is at least half of its total
+		# voting-age population (same any-part VAP definition used everywhere else).
 		current_number_minority_districts = 0
-
 		for district in districts:
-			minority_population = 0
-			total_population = 0
+			minority_vap = 0
+			total_vap = 0
 			for parcel in district:
-				minority_population += self.minority_population[parcel]
-				total_population += self.population[parcel]		
-		
-		return current_s, split_number
+				minority_vap += self.minority_population[parcel]
+				total_vap += self.voting_age_population[parcel]
+			if total_vap > 0 and minority_vap >= 0.5 * total_vap:
+				current_number_minority_districts += 1
+
+		return current_s, split_number, current_number_minority_districts
 	
 	def compute_lower_bound_s(self):
 
@@ -319,16 +374,81 @@ class problem_instance(object):
 
 	def run_GerryChain_heuristic(self, iterations):
 
+		# Imported lazily: gerrychain is only needed for the heuristic, so the other
+		# tables keep working without it. (These names were previously undefined --
+		# neither this module nor aux_functions imported them.)
+		from gerrychain import GeographicPartition, MarkovChain, updaters, constraints, accept
+		from gerrychain.tree import recursive_tree_part, bipartition_tree
+		from gerrychain.proposals import recom
+		import random as _random
+
+		# --- seeding robustness -------------------------------------------------
+		# recursive_tree_part draws a random spanning tree and looks for a
+		# population-balanced edge to cut. At +/-0.5% deviation with many districts
+		# this can fail, and gerrychain's default budget is only
+		#     method = partial(bipartition_tree, max_attempts=10000)
+		# with pair reselection DISABLED. When the budget runs out it raises
+		#     RuntimeError: Could not find a possible cut after 10000 attempts
+		# and the whole instance dies before the chain even starts. That is what
+		# killed FL on the first sweep.
+		#
+		# NOTE this is a *seeding* budget, not the number of chain iterations. No
+		# increase in `iterations` can rescue it, because the failure happens
+		# before iteration 1.
+		#
+		# Fix: raise the per-attempt budget, enable pair reselection (which lets
+		# the bipartition step pick a different district pair instead of giving
+		# up), and retry the whole seed from a fresh random seed if it still
+		# fails. The retries matter because the failure is stochastic: the same
+		# instance and settings can succeed or fail depending on the draw.
+		_seed_attempts = int(os.environ.get("GC_SEED_MAX_ATTEMPTS", 200000))
+		_seed_retries = int(os.environ.get("GC_SEED_RETRIES", 25))
+		_seed_method = partial(bipartition_tree,
+							   max_attempts=_seed_attempts,
+							   allow_pair_reselection=True)
+		# the chain's proposal gets the same hardening so a long run cannot die
+		# halfway through on an unlucky recombination step
+		_recom_method = partial(bipartition_tree,
+								max_attempts=_seed_attempts,
+								allow_pair_reselection=True)
+
 		s = -1
-		my_updaters = {'population': updaters.Tally('P0030001', alias='population')}
-		start = recursive_tree_part(self.G, range(self.k),sum(self.G.nodes[i]['P0030001'] for i in self.G.nodes())/self.k,'P0030001', self.population_deviation/2,1)
+		# Balance TOTAL population (P0010001) -- the quantity the MIP constrains via
+		# L <= sum_v p_v x_vj <= U, where self.population is P0010001. This routine
+		# previously balanced P0030001 (voting-age population) instead. Because VAP
+		# is only ~77% of total population and that share varies across districts, a
+		# plan balanced to +/-0.5% on VAP is generally OUTSIDE +/-0.5% on total
+		# population, so its districts violate [L,U] and the plan is unusable both as
+		# a feasibility certificate and as a MIP warm start. (The GerryChain routine
+		# used for the tradeoff curve, below, already used P0010001 correctly.)
+		my_updaters = {'population': updaters.Tally('P0010001', alias='population')}
+		_pop_target = sum(self.G.nodes[i]['P0010001'] for i in self.G.nodes()) / self.k
+
+		# Time-boxed, retrying seed. See gc_seed.py for why this is a subprocess
+		# with a wall-clock budget rather than a bigger max_attempts: the seeding
+		# runtime is heavy-tailed, so restarting beats waiting.
+		from gc_seed import seed_partition
+		_json = ('./raw_data/' + self.parcel_level + '/json/' + self.state + '_'
+				 + ('counties' if self.parcel_level == 'county' else 'tracts') + '.json')
+		start = seed_partition(_json, self.k, 'P0010001',
+							   self.population_deviation / 2,
+							   log=lambda m: print(m, flush=True))
+		if start is None:
+			raise RuntimeError(
+				'GerryChain could not seed %s %s at +/-%.2f%% deviation within '
+				'the seeding budget. No balanced recursive bipartition was '
+				'found; this is a property of the instance, not a crash.'
+				% (self.state, self.parcel_level,
+				   100 * self.population_deviation / 2))
+
 		initial_partition = GeographicPartition(self.G, start, updaters = my_updaters)
 
 		proposal = partial(recom,
-						pop_col='P0030001',
-						pop_target=sum(self.G.nodes[i]['P0030001'] for i in self.G.nodes())/self.k,
+						pop_col='P0010001',
+						pop_target=_pop_target,
 						epsilon=self.population_deviation/2,
-						node_repeats=2
+						node_repeats=2,
+						method=_recom_method
 						)
 
 		compactness_bound = constraints.UpperBound(
@@ -417,6 +537,11 @@ class problem_instance(object):
 
 		time1 = time.time()
 		iterations = 0
+		prefilter_hits = 0
+
+		# CSR for the cheap (no-MIP) combinatorial fixing pre-screen
+		if not hasattr(self, '_csr_fix'):
+			self._csr_fix = CSRGraph(self.G.number_of_nodes(), self.G.edges())
 
 		nodes_to_not_be_checked = fixed_vertices + skiped_vertices
 		nodes_to_be_checked = list(set(self.G.nodes()) - set(nodes_to_not_be_checked))
@@ -425,23 +550,126 @@ class problem_instance(object):
 		if nodes_to_be_checked == []:
 			return []
 		nodes_to_be_fixed = []
-		if nodes_to_be_checked:
-			nodes_to_be_checked_is_empty = False
-		else:
-			nodes_to_be_checkd_is_empty = True
-		
 
-		while not nodes_to_be_checked_is_empty:
-			time3 = time.time()
-			v = nodes_to_be_checked[-1]
-			verticies_in_induced_subgraph = list(set(self.G.nodes()) - (set(nodes_to_be_fixed + fixed_vertices)))
-			induced_subgraph = self.G.subgraph(verticies_in_induced_subgraph)
-			sub_graph = nx.ego_graph(induced_subgraph, v, radius=self.s)
+		# Worklist as a LIFO stack (matching the original's nodes_to_be_checked[-1]
+		# order) with a 'done' set for O(1) lazy removal, plus an incrementally
+		# maintained 'allowed' membership mask for the induced subgraph
+		# (= every vertex except those already fixed). Previously the induced-vertex
+		# set and the [False]*n mask were rebuilt from scratch every iteration --
+		# O(n) each, i.e. O(n^2) total at tract scale -- as were two list-comprehension
+		# removals. The fix/skip decisions and their order are unchanged.
+		n_nodes = self.G.number_of_nodes()
+		fixed_set = set(fixed_vertices)
+		allowed = [False] * n_nodes
+		for u in self.G.nodes():
+			if u not in fixed_set:
+				allowed[u] = True
+		stack = list(nodes_to_be_checked)
+		done = set()
+
+		# Phase A -- iterate the cheap combinatorial pre-screen to a fixpoint
+		# (Proposition "Validity of iterative fixing" in the Online Supplement).
+		# Each fix removes a parcel from `allowed`, shrinking the radius-s balls of
+		# the remaining parcels and possibly exposing further fixable parcels, so we
+		# re-scan until a full sweep fixes nothing new. This is sound for any order,
+		# fixes the maximal set the pre-screen certifies far more cheaply than the
+		# per-parcel solve, and shrinks the workload of the CP-SAT phase below.
+		if option == 'minority':
+			prescreen_changed = True
+			while prescreen_changed:
+				prescreen_changed = False
+				for v in nodes_to_be_checked:
+					if v in done:
+						continue
+					if can_fix_minority(self._csr_fix, v, self.s, allowed,
+					                    self.population, self.L, self.U,
+					                    self.minority_population,
+					                    self.voting_age_population, self.f):
+						nodes_to_be_fixed.append(v)
+						allowed[v] = False
+						done.add(v)
+						prefilter_hits += 1
+						iterations += 1
+						prescreen_changed = True
+
+		# Per-pass budget on the number of CP-SAT feasibility solves (pass 3). The
+		# cheap pre-screen -- which does the bulk of the fixing -- runs unlimited;
+		# once this many borderline parcels have been decided by CP-SAT we stop the
+		# pass, leaving the rest unfixed. This hard-bounds the cost of the expensive
+		# passes (large tracts at mid/high s, where most parcels are feasible and
+		# each solve also rebuilds an O(n^2) distance structure). Sound -- we only
+		# ever fix provably-infeasible parcels -- and low-s passes fix almost
+		# everything through the pre-screen without reaching this budget, so
+		# ell_s^fix is unaffected.
+		MAX_CPSAT_SOLVES_PER_PASS = 150
+		cpsat_solves = 0
+
+		while stack:
+			v = stack.pop()
+			if v in done:
+				continue
+
+			# -------- cheap combinatorial pre-screen (no MIP) --------
+			# If v provably cannot lie in any feasible minority-majority district
+			# of diameter <= s, fix it immediately and skip the MIP. Sound:
+			# can_fix_minority only returns True when the radius-s ball around v
+			# cannot supply population L and minority share f (validated in
+			# test_prefilter.py). The MIP would fix exactly these vertices too.
+			if option == 'minority' and can_fix_minority(self._csr_fix, v, self.s, allowed,
+			                    self.population, self.L, self.U,
+			                    self.minority_population,
+			                    self.voting_age_population, self.f):
+				nodes_to_be_fixed.append(v)
+				allowed[v] = False
+				done.add(v)
+				prefilter_hits += 1
+				iterations += 1
+				continue
+			# ---------------------------------------------------------
+
+			# radius-s ball of v within the induced subgraph via array BFS
+			# (replaces the slow per-node nx.ego_graph). bfs1 restricts traversal
+			# to `allowed` nodes and caps depth at s; reached nodes are q1[:t1].
+			self._csr_fix.bfs1(v, allowed=allowed, cap=self.s)
+			ball = [self._csr_fix._q1[i] for i in range(self._csr_fix._t1)]
+
+			# Pass 3 (distance cuts / diameter <= s): solve the per-node feasibility
+			# with CP-SAT rather than the MIP. The far-pair constraints are binary
+			# clauses that CP-SAT's clause propagation resolves in ~1s even on the
+			# large high-s balls, whereas Gurobi routinely hits the 10s limit there
+			# (leaving parcels unfixed). CP-SAT thus both runs far faster and, by
+			# actually deciding those subproblems, fixes at least as many parcels.
+			if pass_level == 3:
+				# Budget exhausted: skip the (expensive) CP-SAT solve for v and
+				# leave it unfixed, but DO NOT break -- keep looping so the cheap
+				# pre-screen still fixes the remaining parcels it can. (Breaking
+				# here also cut off pre-screen fixings, badly undercounting the
+				# high-s passes of the large instances.)
+				if cpsat_solves >= MAX_CPSAT_SOLVES_PER_PASS:
+					done.add(v)
+					iterations += 1
+					continue
+				cpsat_solves += 1
+				status, witness = self._fixing_feasible_cpsat(v, ball)
+				if status == 'timeout':
+					print('Time limit reached')
+					done.add(v)
+				elif status == 'feasible':
+					for i in witness:
+						done.add(i)
+				else:   # infeasible: v cannot lie in any such district -> fix it
+					nodes_to_be_fixed.append(v)
+					allowed[v] = False
+					done.add(v)
+				iterations += 1
+				continue
+
+			sub_graph = self.G.subgraph(ball)
 
 			m = gp.Model()
 			m.Params.OutputFlag = 0
 			m.Params.TIME_LIMIT = 10
-			
+
 
 
 			m._t = m.addVars(sub_graph.nodes(), vtype=gp.GRB.BINARY, name='T')
@@ -475,32 +703,27 @@ class problem_instance(object):
 
 			m.optimize()
 
-			checked_nodes = []
-
 			if m.status == gp.GRB.TIME_LIMIT:
 				print('Time limit reached')
-				nodes_to_be_checked.remove(v)
+				done.add(v)   # cannot conclude; stop checking v (left unfixed)
+			elif m.status == gp.GRB.OPTIMAL:
+				# v lies in a feasible population-balanced minority district of
+				# diameter <= s, so none of the witnessed nodes (t > 0.5, which
+				# include v since t[v].lb = 1) can be fixed.
+				for i in sub_graph.nodes():
+					if m._t[i].x > 0.5:
+						done.add(i)
 			else:
-				if m.status == gp.GRB.OPTIMAL:
-					for i in sub_graph.nodes():
-						if m._t[i].x > 0.5:
-							checked_nodes.append(i)
-					
-
-
-				else:
-					checked_nodes.append(v)
-					nodes_to_be_fixed.append(v)
-
-				nodes_to_be_checked = [node for node in nodes_to_be_checked if node not in checked_nodes]
-
-			if not nodes_to_be_checked:
-				nodes_to_be_checked_is_empty = True
+				# infeasible: v cannot lie in any such district -> fix it.
+				nodes_to_be_fixed.append(v)
+				allowed[v] = False
+				done.add(v)
 
 			iterations += 1
-			time4 = time.time()
-			
+
 		time2 = time.time()
+
+		print('combinatorial pre-screen fixed', prefilter_hits, 'of', len(nodes_to_be_fixed), 'vertices without a MIP')
 
 		if option == 'minority':
 
@@ -514,8 +737,58 @@ class problem_instance(object):
 			print('percent_fixed', str(100 * len(self.majority_fixings) / len(self.G.nodes())), '%')
 			print('TOTAL TIME', str(time2 - time1))
 
+	def _fixing_feasible_cpsat(self, v, ball):
+		"""Pass-3 per-node feasibility, solved with CP-SAT instead of the MIP.
+
+		Question: is there a set T of parcels inside v's radius-s ball, containing
+		v, with population in [L, U], a minority voting-age majority, and every pair
+		within graph-distance s (i.e. diameter <= s)? The diameter is enforced by
+		binary 'far-pair' clauses (not both endpoints of a >s-apart pair), which
+		CP-SAT resolves far faster than the equivalent MIP -- typically ~1s even on
+		the large high-s balls where Gurobi hits the time limit.
+
+		Returns ('feasible', witness_nodes) / ('infeasible', None) / ('timeout', None).
+		A minority-majority uses f = 1/2, encoded exactly as 2*mvap - vap >= 0.
+		"""
+		from ortools.sat.python import cp_model
+
+		B = ball
+		Bset = set(B)
+		relabel = {u: i for i, u in enumerate(B)}
+		edges = [(relabel[u], relabel[w]) for u in B for w in self.G.neighbors(u)
+		         if w in Bset and relabel[u] < relabel[w]]
+		csr = CSRGraph(len(B), edges)
+		far = far_pairs(csr, self.s, range(len(B)))
+
+		model = cp_model.CpModel()
+		x = {u: model.NewBoolVar('x%d' % u) for u in B}
+		model.Add(x[v] == 1)
+		model.Add(sum(self.population[u] * x[u] for u in B) >= self.L)
+		model.Add(sum(self.population[u] * x[u] for u in B) <= self.U)
+		model.Add(sum((2 * self.minority_population[u] - self.voting_age_population[u]) * x[u] for u in B) >= 0)
+		for (a, b) in far:
+			model.AddBoolOr([x[B[a]].Not(), x[B[b]].Not()])
+
+		solver = cp_model.CpSolver()
+		# 3s per-parcel cap: parcels that cannot be decided this fast almost never
+		# resolve within 10s either, so a tighter cap makes the unavoidable
+		# time-outs ~3x cheaper while losing almost no fixings (a parcel that
+		# times out is left unfixed in both cases -- sound, just conservative).
+		solver.parameters.max_time_in_seconds = 3
+		solver.parameters.num_search_workers = 8
+		result = solver.Solve(model)
+		if result in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+			return 'feasible', [u for u in B if solver.Value(x[u]) == 1]
+		if result == cp_model.INFEASIBLE:
+			return 'infeasible', None
+		return 'timeout', None
+
 	def save_fixing_info(self, pass_level, time, draw_map=False):
 		output_string = ''
+
+		# ensure the output directory exists (it may have been deleted to force a
+		# clean recompute of the fixing cache)
+		os.makedirs('./results_' + self.group + '/fixing/txt/', exist_ok=True)
 
 		with open('./results_' + self.group + '/fixing/txt/' + self.state + '_' + self.parcel_level + '_' + '{:02d}'.format(self.s) + 'pass' + str(pass_level)+ '.txt', 'w') as doc:
 			output_string += (str(time) + ' \n')
@@ -553,7 +826,7 @@ class problem_instance(object):
 		else:
 			time1 = time.time()
 
-			print('No input file for first pass', self.state, self.parcel_level, self.s)
+			print('No cached file for pass', pass_level, '-', self.state, self.parcel_level, 's =', self.s)
 
 			if pass_level == 4:
 				print('Applying minority pass', pass_level, 'fixing subproblem')
@@ -586,8 +859,19 @@ class problem_instance(object):
 		self.majority_fixings = []
 		
 		self.parcel_fixing_iteration(1)
-		self.parcel_fixing_iteration(2)
-		self.parcel_fixing_iteration(3)
+		# Passes 2 (flow) and 3 (distance-cut) solve a per-node MIP (10s limit
+		# each) for EVERY unfixed vertex. At tract scale and/or large s the
+		# radius-s ball covers most of the graph, so these passes fix ~0 vertices
+		# while costing thousands of timed-out MIPs (hours). Only run them on small
+		# instances where they are cheap and productive. Skipping them is sound:
+		# fixing only removes provably-zero variables, so fewer fixings just leaves
+		# a larger (still exact) model.
+		if self.G.number_of_nodes() <= 300:
+			self.parcel_fixing_iteration(2)
+			self.parcel_fixing_iteration(3)
+		else:
+			print('Skipping fixing passes 2-3 (n=%d > 300): per-node MIPs are '
+			      'unproductive and slow at this scale.' % self.G.number_of_nodes())
 
 		if draw_map:
 			self.draw_fixing_map()
@@ -603,31 +887,29 @@ class problem_instance(object):
 
 	def read_fixing_info(self, filename):
 
-		fixing_file = open(filename, 'r')
-		time = fixing_file.readline()[:-2]
-		num_of_fixings = 0
+		with open(filename, 'r') as fixing_file:
+			time = fixing_file.readline()[:-2]
+			num_of_fixings = 0
 
+			while True:
+				line = fixing_file.readline()
 
-		while True:
-			line = fixing_file.readline()
+				if not line:
+					break
 
+				vertex = int(line[:-7])
+				fixing_status = line[-6:-1]
 
-			if not line:
-				break
+				if vertex in self.minority_fixings:
+					continue
+				if vertex in self.majority_fixings:
+					continue
 
-			vertex = int(line[:-7])
-			fixing_status = line[-6:-1]
-
-			if vertex in self.minority_fixings:
-				continue
-			if vertex in self.majority_fixings:
-				continue
-
-			if fixing_status == 'minor':
-				self.minority_fixings.append(int(vertex))
-				num_of_fixings +=1
-			if fixing_status == 'major':
-				self.majority_fixings.append(int(vertex))
+				if fixing_status == 'minor':
+					self.minority_fixings.append(int(vertex))
+					num_of_fixings +=1
+				if fixing_status == 'major':
+					self.majority_fixings.append(int(vertex))
 
 	def create_fixing_csv_file(self):
 		
@@ -708,17 +990,41 @@ class problem_instance(object):
 
 					time = 0
 
+	# Memory budget for the OPTIONAL up-front pairwise far-pair distance cuts.
+	# The lazy separator callback (compactness_callback) enforces the full
+	# diameter <= s bound on its own, so these pairwise conflict cuts only tighten
+	# the root relaxation -- they are NOT needed for correctness. Materializing all
+	# of them is O(|far pairs| x #district labels); Gurobi stores every row even
+	# when it is marked Lazy=3, which OOMs on large tracts (e.g. TX at the tract
+	# level has ~24 minority labels x millions of far pairs => hundreds of millions
+	# of rows). Past this budget we skip the up-front family and defer entirely to
+	# the parsimonious lazy separation of minimal length-s a,b-separators (cf.
+	# Salemi & Buchanan, "Parsimonious formulations for low-diameter clusters",
+	# Math. Prog. Comp. 2020). The optimum is unchanged either way.
+	MAX_UPFRONT_DISTANCE_CUTS = 5_000_000
+
 	def add_lazy_distance_cuts(self, model, option, district_labels=True):
 
 		non_fixed_nodes = list(set(self.G.nodes()) - set(self.minority_fixings))
 
-		if non_fixed_nodes:
+		if non_fixed_nodes and option != "majority" and len(self.minority_district_range):
 			induced_graph = self.G.subgraph(non_fixed_nodes)
-			power_graph = nx.power(induced_graph, self.s)
-			complement_power_graph = nx.complement(power_graph)
+			# conflict pairs = complement(G^s) on induced_graph (dist > s), via
+			# fast BFS instead of nx.power + nx.complement (validated equal).
+			_nodes = list(induced_graph.nodes())
+			_relabel = {u: i for i, u in enumerate(_nodes)}
+			_edges = [(_relabel[u], _relabel[v]) for u, v in induced_graph.edges()]
+			_csr = CSRGraph(len(_nodes), _edges)
+			conflict_pairs = [(_nodes[a], _nodes[b])
+			                  for (a, b) in far_pairs(_csr, self.s, range(len(_nodes)))]
 
-			if option != "majority":
-				for (u, v) in complement_power_graph.edges():
+			n_cuts = len(conflict_pairs) * len(self.minority_district_range)
+			if n_cuts > self.MAX_UPFRONT_DISTANCE_CUTS:
+				print("  [distance cuts] deferring %d up-front minority cuts to the "
+				      "lazy separator callback (budget %d)"
+				      % (n_cuts, self.MAX_UPFRONT_DISTANCE_CUTS))
+			else:
+				for (u, v) in conflict_pairs:
 					for j in self.minority_district_range:
 						if district_labels:
 							compact_constr = model.addConstr(model._X[u, j] + model._X[v, j] <= model._Z[j])
@@ -727,8 +1033,25 @@ class problem_instance(object):
 
 						compact_constr.Lazy = 3
 
-			if option != "minority":
-				for (u, v) in complement_power_graph.edges():
+		if non_fixed_nodes and option != "minority" and len(self.majority_district_range):
+			# Majority districts MAY contain minority-fixed nodes, so their
+			# within-district distances must be measured on the FULL graph, not
+			# the minority-fixing-induced subgraph. Using the induced subgraph
+			# here wrongly forbids majority configurations that route through a
+			# fixed node (full distance <= s but induced distance > s), which
+			# cuts off FEASIBLE plans -- e.g. a warm-start majority district that
+			# uses a fixed node as a connector ("MIP start violates Rxxxx").
+			_full_csr = CSRGraph(self.G.number_of_nodes(), list(self.G.edges()))
+			majority_conflict_pairs = [(u, v) for (u, v)
+			                           in far_pairs(_full_csr, self.s, list(self.G.nodes()))]
+
+			n_cuts = len(majority_conflict_pairs) * len(self.majority_district_range)
+			if n_cuts > self.MAX_UPFRONT_DISTANCE_CUTS:
+				print("  [distance cuts] deferring %d up-front majority cuts to the "
+				      "lazy separator callback (budget %d)"
+				      % (n_cuts, self.MAX_UPFRONT_DISTANCE_CUTS))
+			else:
+				for (u, v) in majority_conflict_pairs:
 					for j in self.majority_district_range:
 						if district_labels:
 							compact_constr = model.addConstr(model._Y[u, j] + model._Y[v, j] <= model._W[j])
@@ -742,8 +1065,19 @@ class problem_instance(object):
 
 		if non_fixed_nodes:
 			induced_graph = self.G.subgraph(non_fixed_nodes)
-			power_graph = nx.power(induced_graph, self.s)
-			complement_power_graph = nx.complement(power_graph)
+			# complement of the s-th power of the induced graph, built WITHOUT
+			# materializing the dense power graph (nx.power blows up memory at
+			# large s). far_pairs returns exactly the pairs at induced distance
+			# > s (or disconnected) -- i.e. the edges of complement(G_induced^s).
+			_nodes_list = list(induced_graph.nodes())
+			_idx = {v: i for i, v in enumerate(_nodes_list)}
+			_csr = CSRGraph(len(_nodes_list),
+			                [(_idx[u], _idx[v]) for u, v in induced_graph.edges()])
+			_far = far_pairs(_csr, self.s, range(len(_nodes_list)))
+			complement_power_graph = nx.Graph()
+			complement_power_graph.add_nodes_from(_nodes_list)
+			complement_power_graph.add_edges_from(
+				(_nodes_list[a], _nodes_list[b]) for a, b in _far)
 			cliques = nx.find_cliques(complement_power_graph)
 
 			if option != "majority":
@@ -772,12 +1106,18 @@ class problem_instance(object):
 
 	def add_lazy_distance_cuts_fixing_problem(self, model, sub_graph):
 
-		power_graph = nx.power(sub_graph, self.s)
+		# conflict pairs = complement(G^s) within sub_graph, i.e. pairs with
+		# dist_{sub_graph}(u,v) > s. Computed via fast BFS (validated equal to
+		# nx.complement(nx.power(sub_graph, s)) in test_power.py) instead of
+		# materializing the dense power graph and its complement.
+		nodes = list(sub_graph.nodes())
+		relabel = {u: i for i, u in enumerate(nodes)}
+		edges = [(relabel[u], relabel[v]) for u, v in sub_graph.edges()]
+		csr = CSRGraph(len(nodes), edges)
 
-		complement_power_graph = nx.complement(power_graph)
-
-		for (u, v) in complement_power_graph.edges():
-
+		for (a, b) in far_pairs(csr, self.s, range(len(nodes))):
+			u = nodes[a]
+			v = nodes[b]
 			compact_constr = model.addConstr(model._t[u] + model._t[v] <= 1)
 			compact_constr.Lazy = 3
 
@@ -973,13 +1313,23 @@ class problem_instance(object):
 			plt.show()
 
 	def add_symmetry_constraints(self):
+		# Independent-set symmetry-breaking constraints (Online Supplement,
+		# Proposition 1): for the i-th independent-set vertex v (i = 1,...,q),
+		#     y_{v, k-i+1} + sum_{j=1}^{min(i, k_m)} x_{v, j} = 1.
+		# Together with the assignment constraints these fix a subset of the x, y
+		# variables to zero, hence they carve out a FACE of P_0 and preserve its
+		# integrality (Lemma in the main text). They are super valid, so the
+		# optimum is preserved. Here i (paper, 1-indexed) = fixing + 1, the non-MM
+		# target k-i+1 is the 0-indexed label self.k-1-fixing, and the MM prefix
+		# min(i, k_m) = min(fixing+1, self.k_minority).
 		max_independent_set = list(compute_stability_number('read', self.G, self.state, self.k, self.s, self.group))
 		number_of_symmetry_breaking_allowed = min(len(max_independent_set), len(self.majority_district_range))
-		
+
 		i = self.k - 1
 		for fixing in range(number_of_symmetry_breaking_allowed):
 			v = max_independent_set[0]
-			self.m.addConstr(gp.quicksum(self.m._X[v,j] for j in self.minority_district_range) + self.m._Y[v,i] == 1)
+			prefix = min(fixing + 1, self.k_minority)  # min(i, k_m) with i = fixing+1
+			self.m.addConstr(gp.quicksum(self.m._X[v, j] for j in range(prefix)) + self.m._Y[v, i] == 1)
 			max_independent_set.pop(0)
 			i -= 1
 
@@ -1006,10 +1356,12 @@ class problem_instance(object):
 		#1b
 		self.m.addConstrs(gp.quicksum(self.m._X[v, j] for j in self.minority_district_range) <= 1 for v in self.G.nodes())
 
-		#1c
-		self.m.addConstrs(self.L * self.m._Z[j] <= gp.quicksum(self.population[v] * self.m._X[v, j] for v in self.G.nodes()) for j in self.minority_district_range)
-		#1c
-		self.m.addConstrs(self.U * self.m._Z[j] >= gp.quicksum(self.population[v] * self.m._X[v, j] for v in self.G.nodes()) for j in self.minority_district_range)
+		#1c population balance: build each district's population expression ONCE
+		# and reuse it for both the lower (L) and upper (U) bound (previously this
+		# linear expression was constructed twice).
+		pop_expr = {j: gp.quicksum(self.population[v] * self.m._X[v, j] for v in self.G.nodes()) for j in self.minority_district_range}
+		self.m.addConstrs(self.L * self.m._Z[j] <= pop_expr[j] for j in self.minority_district_range)
+		self.m.addConstrs(pop_expr[j] <= self.U * self.m._Z[j] for j in self.minority_district_range)
 		#1d
 		self.m.addConstrs(gp.quicksum(self.minority_population[v] * self.m._X[v, j] for v in self.G.nodes()) >= self.f * gp.quicksum(self.voting_age_population[v] * self.m._X[v, j] for v in self.G.nodes()) for j in self.minority_district_range)
 
@@ -1087,7 +1439,20 @@ class problem_instance(object):
 			self.time_out = False
 
 		elif self.m.status == gp.GRB.TIME_LIMIT:
-			self.num_minority_districts = self.m.getAttr(gp.GRB.Attr.ObjVal)
+			# This model MAXIMIZES the number of majority-minority districts and
+			# its optimum is the upper bound k_m. On a timeout the VALID upper
+			# bound is the solver's bound, not the incumbent ObjVal: the
+			# incumbent is merely a feasible value, so using it would understate
+			# k_m and could fix away optimal solutions. Floor to an integer,
+			# since the objective counts districts.
+			_bnd = self.m.getAttr(gp.GRB.Attr.ObjBound)
+			self.num_minority_districts = int(math.floor(_bnd + 1e-6))
+			# self.output and self.BB_node were left UNSET on this branch, so
+			# generate_upper_bound_minority_table died with
+			#   AttributeError: 'problem_instance' object has no attribute 'output'
+			# the first time an instance hit the limit (CA majority-Latino).
+			self.output = self.num_minority_districts
+			self.BB_node = self.m.NodeCount
 			self.time_out = True
 		else:
 			self.num_minority_districts = 'Model Status: ' + str(self.m.status)
@@ -1199,8 +1564,19 @@ class problem_instance(object):
 		with open('./results_' + self.group + '/interesting_s_vals/interesting_s_vals_' + self.state + '_' + self.parcel_level + '.csv', 'w') as doc:
 			doc.write(output_string)
 
-	def labeling_model(self, reduced_model, parcel_fixing, symmetry_breaking_constraint):
+	def labeling_model(self, reduced_model, parcel_fixing, symmetry_breaking_constraint, bare=False, warm_start=None):
+			# warm_start (optional): (minority_districts, majority_districts), each
+			# a list of node-lists, with the majority-minority districts FIRST. It
+			# is injected as a Gurobi MIP start below. Use it with a heuristic plan
+			# (e.g. from GerryChain) whose diameter is <= s, so the start is feasible
+			# and the solver begins from a known incumbent instead of from scratch.
 
+			# bare=True: compare the BARE formulation only -- no up-front clique
+			# distance cuts (the z-ordering IS kept; it is structurally required
+			# for the separator callback to type districts). Compactness
+			# (contiguity + diameter <= s) is enforced by the lazy separator
+			# callback. parcel_fixing and symmetry_breaking_constraint should also
+			# be False for a bare run.
 			s = self.s
 			self.m = gp.Model()
 			self.m.Params.TIME_LIMIT = self.model_time_limit
@@ -1221,17 +1597,29 @@ class problem_instance(object):
 				for i in self.majority_district_range:
 					self.m._W[i].lb = 1
 
-			if symmetry_breaking_constraint:
+			if symmetry_breaking_constraint and warm_start is None:
+				# The independent-set symmetry-breaking constraints pin specific
+				# vertices to specific district INDICES. An externally supplied warm
+				# start (GerryChain / CCC) labels districts arbitrarily, so it lands
+				# in a different symmetry class and violates these equalities
+				# ("User MIP start violates constraint R0"). Skip them when warm
+				# starting -- the model stays EXACT (symmetry breaking is only a
+				# speed-up), and the warm start is then feasible.
 				self.add_symmetry_constraints()
-				
-			
+
+
 			if parcel_fixing:
 				self.apply_parcel_fixing()
 
-			if s:
-				distance_constraints = 'clique'
-				#distance_constraints = 'pairwise_lazy'
-				
+			if s and not bare:
+				# Use the pairwise far-pair distance cuts (array BFS via far_pairs,
+				# added as a Lazy=3 pool that Gurobi pulls on demand). This avoids
+				# nx.find_cliques, whose maximal-clique enumeration blows up on the
+				# dense complement-power graph at tract scale / large s. The lazy
+				# separator callback still enforces the full diameter bound, so the
+				# model remains exact; this only changes the up-front cut family.
+				distance_constraints = 'pairwise_lazy'
+
 				if distance_constraints == 'pairwise_lazy':
 					self.add_lazy_distance_cuts(self.m, 'both')
 				elif distance_constraints == 'clique':
@@ -1280,11 +1668,15 @@ class problem_instance(object):
 			
 			self.m.addConstrs(gp.quicksum(self.voting_age_population[v] - self.minority_population[v] * self.m._Y[v, j] for v in self.G.nodes()) >= (1 - self.f) * gp.quicksum(self.voting_age_population[v] * self.m._Y[v, j] for v in self.G.nodes()) for j in range(self.k))
 
+			# Keep the z-ordering even when bare: it is structurally required for
+			# the separate x/y formulation's separator callback to target the
+			# correct district indices (it pins majority-minority districts to the
+			# low indices). It is a valid symmetry breaker, not a performance trick.
 			if reduced_model:
 				self.m.addConstrs(self.m._Z[i] >= self.m._Z[i + 1] for i in range(self.k_minority - 1))
 			else:
 				self.m.addConstrs(self.m._Z[i] >= self.m._Z[i + 1] for i in range(self.k - 1))
-			
+
 			self.m._k_minority = self.k_minority
 			self.m._G = self.G
 			self.m._k = self.k
@@ -1301,22 +1693,80 @@ class problem_instance(object):
 			self.m._population = self.population
 			self.m._n = len(self.G.nodes())
 
-			if False:
+			if warm_start is not None:
+				# Inject the heuristic plan as a COMPLETE Gurobi MIP start: set every
+				# x/y/z/w start explicitly (0 everywhere, then the plan's 1s), so
+				# Gurobi does not have to complete a partial start (which it failed to
+				# do, discarding the start). Majority-minority districts take the low
+				# indices (x/z); the rest take the remaining indices (y/w).
+				ws_minority, ws_majority = warm_start
+				for v in self.G.nodes():
+					for j in self.minority_district_range:
+						self.m._X[v, j].Start = 0
+					for j in range(self.k):
+						self.m._Y[v, j].Start = 0
+				for j in self.minority_district_range:
+					self.m._Z[j].Start = 0
+				for j in range(self.k):
+					self.m._W[j].Start = 0
 				counter = 0
-				for minority_district in minority_districts:
+				for minority_district in ws_minority:
 					for node in minority_district:
-						self.m._X[node, counter].start = 1
+						self.m._X[node, counter].Start = 1
+					self.m._Z[counter].Start = 1
 					counter += 1
-				for majority_district in majority_districts:
+				for majority_district in ws_majority:
 					for node in majority_district:
-						self.m._Y[node, counter].start = 1
+						self.m._Y[node, counter].Start = 1
+					self.m._W[counter].Start = 1
 					counter += 1
+
+			# retain all feasible solutions found during the search so the
+			# benchmark can report every incumbent + its map (mode 1 keeps the
+			# best PoolSolutions found without extra search effort).
+			self.m.Params.PoolSearchMode = 1
+			self.m.Params.PoolSolutions = 100
 
 			#self.m.optimize()
-			self.m.optimize(compactness_callback)
-			
+			try:
+				self.m.optimize(compactness_callback)
+			except gp.GurobiError as e:
+				# A solve-time Gurobi failure (most commonly 'Out of memory' on the
+				# largest tracts, even after deferring the up-front distance cuts)
+				# must not abort the whole sweep. Record a marker -- keeping the
+				# best bound if one was established -- so the caller still writes a
+				# row and the driver moves on to the next instance.
+				self.model_runtime = getattr(self.m, 'runtime', 0.0)
+				self.solve_status = 'error'
+				self.incumbent_obj = None
+				self.mip_gap = None
+				try:
+					self.best_bound = self.m.ObjBound
+				except Exception:
+					self.best_bound = None
+				msg = str(e)
+				self.num_minority_districts = 'OOM' if 'memory' in msg.lower() else ('Error: ' + msg)
+				print("  [solve] GurobiError (%s); recording marker and continuing" % msg)
+				return
+
 			self.model_runtime = self.m.runtime
 
+			# Capture the bounds and MIP gap for EVERY terminal status (additive:
+			# does not change num_minority_districts below). When the 1-hour limit
+			# is hit these let callers report the incumbent (lower bound for this
+			# maximization), Gurobi's best bound (upper bound), and the gap, rather
+			# than only a bare 'Timeout'.
+			self.solve_status = self.m.status
+			self.incumbent_obj = None
+			self.best_bound = None
+			self.mip_gap = None
+			try:
+				if self.m.SolCount > 0:
+					self.incumbent_obj = self.m.ObjVal      # best feasible (LB)
+					self.mip_gap = self.m.MIPGap            # relative gap
+				self.best_bound = self.m.ObjBound           # best bound (UB)
+			except Exception:
+				pass
 
 			if self.m.status == gp.GRB.OPTIMAL:
 
@@ -1428,13 +1878,22 @@ class problem_instance(object):
 			self.m._population = self.population
 			self.m._n = len(self.G.nodes())
 
-			self.m.optimize(compactness_callback)
+			try:
+				self.m.optimize(compactness_callback)
+			except gp.GurobiError as e:
+				# Same guard as labeling_model: a solve-time failure (typically
+				# 'Out of memory' on the largest tracts) must not abort the sweep.
+				# Leave the status non-optimal so the caller records it and moves on.
+				self.model_runtime = getattr(self.m, 'runtime', 0.0)
+				self.gurobi_error = str(e)
+				print("  [solve] GurobiError (%s); continuing" % e)
+				return
 
-
+			self.gurobi_error = None
 			self.model_runtime = self.m.runtime
 
 			if self.m.status == gp.GRB.OPTIMAL:
-				
+
 				self.minority_districts = [[] for i in self.minority_district_range]
 				self.districts = [[] for i in range(self.k)]
 
@@ -1454,14 +1913,24 @@ class problem_instance(object):
 			else:
 				self.num_minority_districts = 'Model Status: ' + str(self.m.status)
 
-	def generate_gerrychain_run(self, number_of_gerrychain_iter):
+	def generate_gerrychain_run(self, number_of_gerrychain_iter=10000):
 
-		
+		# Allow the chain length to be raised without editing code. More
+		# iterations give the short-burst search more chances to find a plan with
+		# additional majority-minority districts, so this is the knob that
+		# improves RESULT QUALITY. (It is NOT the knob that fixes a seeding
+		# failure; see run_GerryChain_heuristic for that.)
+		number_of_gerrychain_iter = int(
+			os.environ.get("GC_ITERS", number_of_gerrychain_iter))
+		print('  GerryChain iterations: %d' % number_of_gerrychain_iter, flush=True)
+
+		os.makedirs('./results_' + self.group + '/gerrychain/', exist_ok=True)
+
 		time1 = time.time()
-		gerrychain_results = instance.run_GerryChain_heuristic(number_of_gerrychain_iter)
+		gerrychain_results = self.run_GerryChain_heuristic(number_of_gerrychain_iter)
 		time2 = time.time()
 		gerrychain_time = '{0:.2f}'.format(time2-time1)
-		gerrychain_output_string = instance.state + ',' + instance.parcel_level + ',' + str(number_of_gerrychain_iter) + ',' + gerrychain_time + ','
+		gerrychain_output_string = self.state + ',' + self.parcel_level + ',' + str(number_of_gerrychain_iter) + ',' + gerrychain_time + ','
 
 
 		for result in gerrychain_results:
@@ -1477,7 +1946,7 @@ class problem_instance(object):
 			majority_districts_from_gerrychain = []
 
 
-			for district in range(instance.k):
+			for district in range(self.k):
 				total_pop_district = 0
 				total_pop_minority = 0
 				list_of_nodes_in_current_district = []
@@ -1485,11 +1954,9 @@ class problem_instance(object):
 						if partition.assignment[node] == district:
 							list_of_nodes_in_current_district.append(node)
 
-							total_pop_district += instance.voting_age_population[node]
-							total_pop_minority += instance.minority_population[node]
+							total_pop_district += self.voting_age_population[node]
+							total_pop_minority += self.minority_population[node]
 
-				district_subgraph = instance.G.subgraph(list_of_nodes_in_current_district)
-				district_diamater = nx.diameter(district_subgraph)
 				if total_pop_minority > self.f * total_pop_district:
 					minority_districts_from_gerrychain.append(list_of_nodes_in_current_district)
 				else:
@@ -1509,27 +1976,52 @@ class problem_instance(object):
 		with open('gerrychain.csv', 'a') as doc:
 			doc.write(gerrychain_output_string)
 		
-	def make_sure_preprocess_exists(self):
+	def make_sure_preprocess_exists(self, match_model_fixing=False):
+		"""Precompute the fixing files for the current s.
+
+		match_model_fixing=True computes ONLY what apply_parcel_fixing will actually
+		load. That method skips passes 2-3 when n > 300, so computing pass 3 for a
+		large instance costs 300-650 s of per-node CP-SAT and is then discarded --
+		which dominated the frontier sweep, where the MIP itself often resolves in
+		1-2 s."""
 
 		result = compute_stability_number('read', self.G, self.state, self.k, self.s, self.group)
 		
 		self.minority_fixings = []
 		self.majority_fixings = []
 
+		# Pass 1 = population + minority (cheap pre-screen + small MIP).
+		# Pass 3 = distance cuts (diameter <= s), a strong and fast certificate.
+		# Pass 2 (single-commodity flow for contiguity) is intentionally skipped:
+		# its per-node feasibility MIPs are by far the slowest part and, on hard
+		# parcels, they hit the time limit without fixing anything anyway (so they
+		# contribute almost nothing while dominating the runtime). Dropping it keeps
+		# the procedure sound -- distance cuts are a valid relaxation, so a parcel is
+		# only ever fixed when provably impossible -- at the cost of a few
+		# contiguity-only fixings. Final fixing counts come from the pass-3 file.
 		self.parcel_fixing_iteration(1)
-		self.parcel_fixing_iteration(2)
-		self.parcel_fixing_iteration(3)
+		if match_model_fixing and self.G.number_of_nodes() > 300:
+			print('  (skipping pass-3 precompute: apply_parcel_fixing discards it at n=%d > 300)'
+			      % self.G.number_of_nodes())
+		else:
+			self.parcel_fixing_iteration(3)
 
 	def generate_instance_info(self):
 		if not os.path.exists('results_' + self.group + '/instance_info.csv'):
 			with open('results_' + self.group + '/instance_info.csv', 'w') as doc:
-				doc.write('State, parcel, k, n, m, diam, % Black pop, current s, split parcels, current # minority districts')
-		
+				doc.write('State, parcel, k, n, m, diam, % minority VAP, current s, split parcels, current # minority districts')
+
 		with open('results_' + self.group + '/instance_info.csv', 'a') as doc:
-			current_s, split_number = self.get_current_plan_stat()
-			#current_s, split_number = 'NA', 'NA'
+			# the enacted-plan statistics need raw_data/current_plan/<state>.shp,
+			# which is not present for every state (e.g. AZ); fall back to 'NA' for
+			# those two columns rather than aborting the whole instance.
+			try:
+				current_s, split_number, current_minority = self.get_current_plan_stat()
+			except Exception as _e:
+				print('  (no enacted-plan shapefile for %s; current s / splits / #MM = NA)' % self.state)
+				current_s, split_number, current_minority = 'NA', 'NA', 'NA'
 			string = '\n'
-			string += self.state + ', ' + self.parcel_level + ', ' + str(self.k) + ', '+ str(len(self.G.nodes())) + ', ' + str(len(self.G.edges())) + ', ' + str(nx.diameter(self.G)) + ', ' + format(100 * sum(self.minority_population)/sum(self.voting_age_population), '.2f') + ',' + str(current_s) + ',' +  str(split_number) + self.error_message + ', '
+			string += self.state + ', ' + self.parcel_level + ', ' + str(self.k) + ', '+ str(len(self.G.nodes())) + ', ' + str(len(self.G.edges())) + ', ' + str(nx.diameter(self.G)) + ', ' + format(100 * sum(self.minority_population)/sum(self.voting_age_population), '.2f') + ',' + str(current_s) + ',' +  str(split_number) + self.error_message + ', ' + str(current_minority)
 			
 			doc.write(string)
 			doc.close()
@@ -1538,40 +2030,69 @@ class problem_instance(object):
 		
 		if not os.path.exists('results_' + self.group + '/upper_bound_minority_table.csv'):
 			with open('results_' + self.group + '/upper_bound_minority_table.csv', 'w') as doc:
-				doc.write('State, parcel, k, n, m, objective, time (s), x & z fixed (%)')
+				doc.write('State, parcel, k, n, m, obj. (k_m), time (s), x & z fixed (%), w fixed (%)')
 
-		instance.k_minority = instance.k
-		instance.minority_district_range = range(instance.k)
-		instance.find_upper_bound_minority_districts(continuity=False, relax=False)
-		instance.table_3_first_pass = instance.output
-		instance.table_3_first_pass_time = instance.minority_district_ONLY_model_time
-		instance.minority_district_range = range(instance.k)
+		self.k_minority = self.k
+		self.minority_district_range = range(self.k)
+		self.find_upper_bound_minority_districts(continuity=False, relax=False)
+		self.table_3_first_pass = self.output
+		self.table_3_first_pass_time = self.minority_district_ONLY_model_time
+		self.minority_district_range = range(self.k)
+
+		# Once the upper bound k_m on the number of majority-minority districts is
+		# known, the remaining (k - k_m) districts cannot be majority-minority, so
+		# their z and x variables are zero-fixed and their w variables one-fixed.
+		# The fixed fraction is therefore (k - k_m)/k (identical for x&z and w).
+		fixed_pct = (self.k - self.table_3_first_pass) / self.k * 100
 
 		with open('results_' + self.group + '/upper_bound_minority_table.csv', 'a') as doc:
 				string = '\n'
-				string += self.state + ',' 
-				string += self.parcel_level + ',' 
-				string += str(self.k) + ',' 
-				string += str(len(self.G.nodes)) + ',' 
-				string += str(len(self.G.edges)) + ',' 
-				string += format(self.table_3_first_pass, '.2f') + ','
+				string += self.state + ','
+				string += self.parcel_level + ','
+				string += str(self.k) + ','
+				string += str(len(self.G.nodes)) + ','
+				string += str(len(self.G.edges)) + ','
+				string += str(int(self.table_3_first_pass)) + ','
 				string += format(self.table_3_first_pass_time, '.2f') + ','
-				string += format(self.table_3_first_pass/self.k * 100, '.2f') + ',' 
+				string += format(fixed_pct, '.2f') + ','
+				string += format(fixed_pct, '.2f')
 
 				doc.write(string)
 				doc.close()
 
 	def generate_fixing_info(self):
-		
+
+		# Cap on how far above the lower bound we sweep s. The fixing procedure is
+		# most valuable near ell_s -- it certifies ell_s^fix (the largest s that is
+		# entirely fixed) and tightens the hardest, smallest-diameter models. At
+		# large s almost every parcel is feasible, so each pass performs a per-node
+		# feasibility solve for most parcels while fixing very little; those passes
+		# dominate the runtime and add negligible value. We therefore sweep s only
+		# up to ell_s + FIXING_SPAN (or until a pass fixes nothing, or s reaches the
+		# graph diameter). Increase FIXING_SPAN for more of the decaying tail at the
+		# cost of markedly longer runs on the large tract instances.
+		FIXING_SPAN = 5
+
 		condition = True
 		self.s = self.lower_bound_s - 1
+		s_cap = min(int(self.upper_bound_s), self.lower_bound_s + FIXING_SPAN)
+		n_parcels = self.G.number_of_nodes()
 		while condition:
 			self.s += 1
 			print('Current s: ', str(self.s))
 			self.make_sure_preprocess_exists()
-			if self.minority_fixings == []:
+			num_fixed = len(self.minority_fixings)
+			if num_fixed == 0:
 				condition = False
-			if self.s == self.upper_bound_s:
+			# Stop at the span cap, EXCEPT keep sweeping while every parcel is still
+			# fixed (100%). That regime is cheap -- the pre-screen fixes all parcels
+			# at once -- and its end is exactly ell_s^fix, the smallest s admitting a
+			# majority-minority district; we therefore only stop past the cap once the
+			# fixing first drops below 100%. (Matters for very sparse-minority states
+			# such as MO, whose 100% region extends well past ell_s + FIXING_SPAN.)
+			elif self.s >= s_cap and num_fixed < n_parcels:
+				condition = False
+			if self.s >= int(self.upper_bound_s):
 				condition = False
 
 	def generate_lower_bound_s_table(self):
@@ -1580,8 +2101,8 @@ class problem_instance(object):
 			with open('results_' + self.group + '/lower_bound_s_table.csv', 'w') as doc:
 				doc.write('State, parcel, lower_bound_s, iterations, time')
 
-		instance.compute_lower_bound_s()
-		
+		self.compute_lower_bound_s()
+
 		with open('results_' + self.group + '/lower_bound_s_table.csv', 'a') as doc:
 			string = '\n'
 			string += self.state + ', ' + self.parcel_level + ', ' + str(self.lower_bound_s) + ', ' + str(self.num_s_iter) + ', ' + format(self.time_for_s_lower_bound, '.2f') + ',' + self.error_message + ', '
@@ -2373,100 +2894,318 @@ class problem_instance(object):
 
 		return tree_edges_q
 
-	def generate_symmetry_table(self):
+	def _fmt_symmetry_result(self):
+		# Read the bound/incumbent/gap captured by labeling_model after the most
+		# recent solve. Returns (obj_str, bound_str, gap_str, gap_value) where
+		# obj is the incumbent (lower bound for this maximization), bound is
+		# Gurobi's best bound (upper bound), gap is the relative MIP gap in %,
+		# and gap_value is the numeric fractional gap (or None) used to compute
+		# the with/without-symmetry gap improvement.
+		if getattr(self, 'incumbent_obj', None) is not None:
+			obj_str = str(int(round(self.incumbent_obj)))
+		elif isinstance(self.num_minority_districts, str) and self.num_minority_districts != 'Timeout':
+			# pass through terminal markers: 'Infeasible', 'OOM', 'Error: ...'
+			obj_str = self.num_minority_districts
+		else:
+			obj_str = 'no incumbent'
 
-		if not os.path.exists('results_' + self.group + '/symmetry_table.csv'):
-			with open('results_' + self.group + '/symmetry_table.csv', 'w') as doc:
-				doc.write('State, parcel level, k, n, m, s, obj_wo_symmetry, time_wo_symmetry, obj_w_symmetry, time_w_symmetry, \n')
+		if getattr(self, 'best_bound', None) is not None:
+			bound_str = '{0:.2f}'.format(self.best_bound)
+		else:
+			bound_str = 'NA'
+
+		gap_value = getattr(self, 'mip_gap', None)
+		gap_str = '{0:.2f}'.format(gap_value * 100.0) if gap_value is not None else 'NA'
+
+		return obj_str, bound_str, gap_str, gap_value
+
+	def generate_symmetry_table(self):
+		"""Panel A -- INFEASIBLE regime: run at s = ell_s (set by the constructor
+		when data.json leaves s unset). At ell_s the tract instances have no valid
+		districting, so this measures how fast infeasibility can be PROVEN with vs
+		without the symmetry-breaking constraints."""
+		self._symmetry_run('results_' + self.group + '/symmetry_table.csv')
+
+	def generate_symmetry_feasible_table(self):
+		"""Panel B -- FEASIBLE regime: run at an s where a plan is known to exist
+		(supplied per instance via data.json). Both solves then have a feasible
+		region, so incumbents/gaps exist and gap_improvement is meaningful."""
+		self._symmetry_run('results_' + self.group + '/symmetry_table_feasible.csv')
+
+	def _symmetry_run(self, csv_path):
+		# NOTE: parcel fixing is ON in both solves, matching the original symmetry
+		# experiment (and Panel A's recorded rows). The with/without-symmetry arms
+		# are therefore apples-to-apples; only the symmetry constraints differ.
+		if not os.path.exists(csv_path):
+			with open(csv_path, 'w') as doc:
+				doc.write('State, parcel level, k, n, m, s, '
+					+ 'obj_wo_symmetry, bound_wo_symmetry, gap_wo_symmetry(%), time_wo_symmetry, '
+					+ 'obj_w_symmetry, bound_w_symmetry, gap_w_symmetry(%), time_w_symmetry, '
+					+ 'gap_improvement(pp), \n')
+		else:
+			# RESUME: skip only if this (state, parcel level, s) triple is already
+			# recorded. Keying on s as well lets the same instance appear at its
+			# infeasible s (Panel A) and its feasible s (Panel B) without one
+			# masking the other. Each solve pair costs up to ~2 hours, so this
+			# makes long runs robust to restarts.
+			with open(csv_path) as doc:
+				existing = doc.read().splitlines()
+			for line in existing[1:]:
+				f = [c.strip() for c in line.split(',')]
+				if len(f) > 5 and f[0] == self.state and f[1] == self.parcel_level and f[5] == str(self.s):
+					print('  (symmetry: %s %s at s=%s already recorded -- skipping)'
+					      % (self.state, self.parcel_level, self.s))
+					return
 
 		string = self.state + ',' + self.parcel_level + ',' + str(self.k) + ',' + str(len(self.G.nodes)) + ',' + str(len(self.G.edges)) + ','  + str(self.s) + ','
 
+		# ---- without symmetry-breaking constraints ----
 		time1 = time.time()
 		self.labeling_model(True, True, False)
 		time2 = time.time()
-
-		
 		no_symmetry_time = format(time2 - time1, '.2f')
-		no_symmetry_obj = str(self.num_minority_districts)
-		
+		obj_wo, bound_wo, gap_wo, gap_wo_val = self._fmt_symmetry_result()
 
-		string += no_symmetry_obj + ',' + no_symmetry_time + ','  
-		
-		
+		string += obj_wo + ',' + bound_wo + ',' + gap_wo + ',' + no_symmetry_time + ','
+
+		# ---- with symmetry-breaking constraints ----
 		time1 = time.time()
 		self.labeling_model(True, True, True)
 		time2 = time.time()
-
 		symmetry_time = format(time2 - time1, '.2f')
-		symmetry_obj = str(self.num_minority_districts)
+		obj_w, bound_w, gap_w, gap_w_val = self._fmt_symmetry_result()
 
-		string += symmetry_obj + ',' + symmetry_time + ', \n'
+		# gap improvement in percentage points (positive => symmetry shrank the gap)
+		if gap_wo_val is not None and gap_w_val is not None:
+			gap_improvement = '{0:.2f}'.format((gap_wo_val - gap_w_val) * 100.0)
+		else:
+			gap_improvement = 'NA'
 
-	
+		string += obj_w + ',' + bound_w + ',' + gap_w + ',' + symmetry_time + ',' + gap_improvement + ', \n'
 
-		with open('results_' + self.group + '/symmetry_table.csv', 'a') as doc:
+		with open(csv_path, 'a') as doc:
 			doc.write(string)
  	
+	def _district_diameter_ok(self, nodes, s):
+		"""True iff G[nodes] is connected with diameter <= s."""
+		sub = self.G.subgraph(nodes)
+		if sub.number_of_nodes() == 0:
+			return False
+		for v in nodes:
+			reach = nx.single_source_shortest_path_length(sub, v, cutoff=s)
+			if len(reach) < len(nodes):     # some node is >s away (or unreachable)
+				return False
+		return True
+
+	def _plan_certifies(self, districts, s, k_m):
+		"""True iff `districts` is a valid plan for the prescribed model at (k_m, s):
+		an exact k-partition, every district population-balanced with diameter <= s,
+		and at least k_m districts majority-minority. Such a plan is a CONSTRUCTIVE
+		feasibility certificate, so no MIP is needed for that frontier point.
+		(At least k_m suffices: the non-majority-minority districts carry no minority
+		constraint, so surplus majority-minority districts may occupy the y-slots.)"""
+		if len(districts) != self.k:
+			return False
+		seen = set()
+		for d in districts:
+			for v in d:
+				if v in seen:
+					return False
+				seen.add(v)
+		if len(seen) != self.G.number_of_nodes():
+			return False
+
+		mm = 0
+		for d in districts:
+			pop = sum(self.population[v] for v in d)
+			if pop < self.L or pop > self.U:
+				return False
+			if not self._district_diameter_ok(d, s):
+				return False
+			vap = sum(self.voting_age_population[v] for v in d)
+			mvap = sum(self.minority_population[v] for v in d)
+			if mvap > self.f * vap:
+				mm += 1
+		return mm >= k_m
+
+	def _plan_max_diameter(self, districts):
+		"""Max district diameter of a plan, or None if some district is disconnected."""
+		worst = 0
+		for d in districts:
+			sub = self.G.subgraph(d)
+			if sub.number_of_nodes() == 0 or not nx.is_connected(sub):
+				return None
+			worst = max(worst, nx.diameter(sub))
+		return worst
+
+	def _heuristic_ub(self, plans, k_m):
+		"""Smallest s at which a stored heuristic plan CERTIFIES k_m majority-minority
+		districts, i.e. min over valid plans with >= k_m MM districts of the plan's
+		max district diameter (a plan of diameter d certifies every s >= d). Returns
+		None if no stored plan achieves k_m. This is an upper bound on s*(k_m) and
+		costs no MIP."""
+		best = None
+		for p in plans:
+			if not self._plan_certifies(p, self.G.number_of_nodes(), k_m):
+				continue          # invalid partition / population / MM count
+			d = self._plan_max_diameter(p)
+			if d is not None and (best is None or d < best):
+				best = d
+		return best
+
+	def _load_heuristic_plans(self):
+		"""All stored GerryChain plans for this instance, as lists of k node-lists."""
+		d = './results_' + self.group + '/gerrychain/'
+		prefix = self.state + '_' + self.parcel_level + '_('
+		plans = []
+		if not os.path.isdir(d):
+			return plans
+		for fn in sorted(os.listdir(d)):
+			if not (fn.startswith(prefix) and fn.endswith('.pckl')):
+				continue
+			try:
+				with open(d + fn, 'rb') as doc:
+					minority_districts, majority_districts = pickle.load(doc)
+				plans.append(list(minority_districts) + list(majority_districts))
+			except Exception as e:
+				print('  (skipping unreadable plan %s: %s)' % (fn, e))
+		return plans
+
 	def check_points_with_prescribed_model(self):
+		"""Table 6 -- the (s, #MM) tradeoff frontier, s*(k_m) = the smallest s at which
+		a plan with k_m majority-minority districts exists.
 
-		if not os.path.exists('results_' + self.group + '/point_check.csv'):
-			with open('results_' + self.group + '/point_check.csv', 'w') as doc:
-				doc.write('State, parcel, n, m, num_minority_districts, s, feasible/infeasible/unknown, time \n')
+		Uses all three accelerations together:
+		  * heuristic (GerryChain)  -- a verified plan CERTIFIES feasibility, no MIP;
+		  * variable fixing         -- shrinks the prescribed feasibility MIP;
+		  * symmetry breaking       -- what makes the INFEASIBLE s values provable.
+		Exploits monotonicity: a plan with k_m majority-minority districts is also a
+		plan for k_m - 1, so s*(k_m) is non-decreasing in k_m. Sweeping k_m upward and
+		carrying s forward therefore skips every s already known to be infeasible."""
+		csv_path = 'results_' + self.group + '/point_check.csv'
+		if not os.path.exists(csv_path):
+			with open(csv_path, 'w') as doc:
+				doc.write('State, parcel, n, m, k_m, s*, status, time, certified_by \n')
 
-		
+		k_m_max = self.k_minority
+		ell_s = self.s
+		u_s = getattr(self, 'upper_bound_s', None) or nx.diameter(self.G)
+		plans = self._load_heuristic_plans()
+		print('  [frontier] %d heuristic plan(s) available; ell_s=%s, u_s=%s'
+		      % (len(plans), ell_s, u_s))
 
-		s_save = self.s
-		
-		interesting_k = range(self.k_minority, 0, -1)
-		
-		
-		for k in interesting_k:
-			string = self.state + ',' + self.parcel_level + ',' + str(len(self.G.nodes())) + ',' + str(len(self.G.edges())) + ',' + str(k) + ','
-			try_higher_s = True
-			self.s = s_save - 1
-			self.k_minority = k
-			time_out_in_a_row = 0
-			while try_higher_s:
+		# RESUME: skip (state, level, k_m) triples already recorded, and restart the
+		# monotone carry from the largest feasible s* already established.
+		done_k_m, s_resume = set(), None
+		with open(csv_path) as doc:
+			for line in doc.read().splitlines()[1:]:
+				f = [c.strip() for c in line.split(',')]
+				if len(f) > 6 and f[0] == self.state and f[1] == self.parcel_level:
+					try:
+						done_k_m.add(int(f[4]))
+					except ValueError:
+						continue
+					# carry forward the established LOWER bound on s*; f[5] is either
+					# an exact "16" or a bracket "[13,16]".
+					tok = f[5].lstrip('[').split(',')[0].lstrip('>=')
+					try:
+						s_resume = max(s_resume or 0, int(tok))
+					except ValueError:
+						pass
+		if done_k_m:
+			print('  [frontier] resuming: k_m %s already recorded' % sorted(done_k_m))
 
-				self.s += 1
-				string += str(self.s) + ','
+		s_lo = s_resume if s_resume else ell_s   # monotone: s*(k_m) >= s*(k_m - 1)
+		timeout_budget = 2                       # give up on a k_m after this many timeouts
+		rows = []
 
-				self.minority_district_range = range(self.k_minority)
-				self.majority_district_range = range(self.k_minority, self.k)
-			
-				self.make_sure_preprocess_exists()
-				print("MODEL BEING SOLVED WITH:")
-				print("S:", str(self.s))
-				print("k_minority:", str(self.k_minority))
+		for k_m in range(1, k_m_max + 1):
+			if k_m in done_k_m:
+				continue
+			self.k_minority = k_m
+			self.minority_district_range = range(k_m)
+			self.majority_district_range = range(k_m, self.k)
+
+			elapsed, certified_by = 0.0, ''
+
+			def _solve_at(s_val):
+				"""Feasibility of the prescribed model at s_val: True / False / None
+				(None = time limit or solver error). Only precomputes the fixing the
+				model will actually use."""
+				self.s = s_val
+				self.make_sure_preprocess_exists(match_model_fixing=True)
+				print('  [frontier] MIP: k_m=%d  s=%d' % (k_m, s_val))
 				self.prescribed_labeling_model()
-					
+				if getattr(self, 'gurobi_error', None):
+					return None
 				if self.m.status == 2:
-					#optimal
-					string += 'Feasible' + ',' + '{0:.2f}'.format(self.model_runtime) + '\n'
-					try_higher_s = False
-
+					return True
 				if self.m.status == 3:
-					#infeasible
-					string += 'Infeasible' + ',' + '{0:.2f}'.format(self.model_runtime) + '\n' + ',' + ','  + ',' + ',' + str(k) + ','
-					
+					return False
+				return None
 
+			# (1) FREE upper bound from the heuristic: smallest diameter at which a
+			# stored plan already achieves k_m majority-minority districts.
+			s_ub = self._heuristic_ub(plans, k_m)
+			if s_ub is not None:
+				certified_by = 'heuristic'
+				print('  [frontier] k_m=%d: heuristic certifies s*<=%d' % (k_m, s_ub))
 
-				if self.m.status == 9:
-					#timeout
-					
+			s_lb = s_lo
+			status, s_star = 'Unknown', '>=' + str(s_lb)
 
-					time_out_in_a_row += 1
-					if time_out_in_a_row == 2:
-						try_higher_s = False
-						string += 'Unknown' + ',' + 'timeout \n'
+			# (2) EXISTENCE FIRST. At s = u_s >= diam(G) the diameter bound is
+			# vacuous, so this single solve decides whether ANY plan with k_m
+			# majority-minority districts exists. If not, we are done in one solve
+			# instead of scanning every s from ell_s to u_s.
+			if s_ub is None:
+				r = _solve_at(u_s)
+				elapsed += self.model_runtime
+				if r is False:
+					status, s_star, certified_by = 'Infeasible', '>' + str(u_s), 'MIP (vacuous s)'
+				elif r is True:
+					s_ub, certified_by = u_s, 'MIP'
+				else:
+					status, s_star, certified_by = 'Unknown', '>=' + str(s_lb), 'timeout at u_s'
+
+			# (3) BINARY SEARCH for the smallest feasible s in (s_lb, s_ub], using
+			# monotonicity: the feasible set only grows with s.
+			if s_ub is not None and status != 'Infeasible':
+				while s_lb < s_ub:
+					mid = (s_lb + s_ub) // 2
+					r = _solve_at(mid)
+					elapsed += self.model_runtime
+					if r is True:
+						s_ub = mid
+						certified_by = 'MIP'
+					elif r is False:
+						s_lb = mid + 1
+						certified_by = 'MIP'
 					else:
-						string += 'Unknown' + ',' + 'timeout \n' + ',' + ','  + ',' + ',' + str(k) + ','
+						break                     # timeout: cannot narrow further
+				if s_lb >= s_ub:
+					status, s_star = 'Feasible', str(s_ub)
+				else:
+					status, s_star = 'Bracketed', '[%d,%d]' % (s_lb, s_ub)
 
-		
+			rows.append('%s,%s,%d,%d,%d,%s,%s,%.2f,%s\n'
+			            % (self.state, self.parcel_level, self.G.number_of_nodes(),
+			               self.G.number_of_edges(), k_m, s_star, status, elapsed, certified_by))
+			with open(csv_path, 'a') as doc:
+				doc.write(rows[-1])
 
+			# Monotonicity: s*(k_m) is non-decreasing in k_m, so the next k_m can
+			# start from this k_m's established LOWER bound (every s below it is
+			# already proven infeasible, and infeasibility only worsens as k_m grows).
+			s_lo = max(s_lo, s_lb)
+			if status == 'Unknown' or 'error' in certified_by:
+				break                    # k_m unresolved => larger k_m is no easier
 
-			with open('results_' + self.group + '/point_check.csv', 'a') as doc:
-				doc.write(string)
+		# restore instance state
+		self.s = ell_s
+		self.k_minority = k_m_max
+		self.minority_district_range = range(k_m_max)
+		self.majority_district_range = range(k_m_max, self.k)
 
 	def short_bursts(self):
 		

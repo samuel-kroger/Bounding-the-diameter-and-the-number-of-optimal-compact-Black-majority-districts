@@ -1,952 +1,941 @@
 {
-	"single":
-	[
-		{
-			"state":"TX",			
-			"parcel_level":"tract",
-			"s":false
-		}
-	],
-	"current":
-	[
-		{
-			"state":"OH",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"IL",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"PA",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"TX",	
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		}
-	],
-	 "paper":
-	[
-		{
-			"state":"MS",
-			"parcel_level":"county",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"MS",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"LA",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"SC",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"AL",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"MD",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"MO",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"TN",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"VA",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"NJ",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"MI",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"NC",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"GA",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"OH",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"IL",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"PA",
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		},
-		{
-			"state":"TX",	
-			"parcel_level":"tract",
-			"s":false,
-			"group":"black"
-		}
-	],
-	"hispanic_paper":
-	[
-		{
-			"state":"NM",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NM",
-			"parcel_level":"tract",
-			"s":false
-		},
-		{
-			"state":"CO",
-			"parcel_level":"tract",
-			"s":false
-		},
-		{
-			"state":"AZ",
-			"parcel_level":"tract",
-			"s":false
-		},
-		{
-			"state":"NJ",
-			"parcel_level":"tract",
-			"s":false
-		},
-		{
-			"state":"IL",
-			"parcel_level":"tract",
-			"s":false
-		},
-		{
-			"state":"TX",
-			"parcel_level":"tract",
-			"s":false
-		}
-	],
-	"hispanic_only":
-	[
-		{
-			"state":"NM",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NM",
-			"parcel_level":"tract",
-			"s":false
-		},
-		{
-			"state":"AZ",
-			"parcel_level":"tract",
-			"s":false
-		}
-	],
-	"hispanic":
-	[
-		{
-			"state":"DE",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"WV",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"SD",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"WY",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NM",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"LA",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"ND",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NE",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NH",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"AL",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"AR",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"VT",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"IA",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"ID",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"ME",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"KS",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MT",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MS",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"SC",
-			"parcel_level":"county",
-			"s":false
-		},
-				{
-			"state":"WA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"DE",
-			"parcel_level":"tract",
-			"s":false
-		},
-		{
-			"state":"WV",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		
-
-		{
-			"state":"SD",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		
-
-		{
-			"state":"NJ",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"NM",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"TX",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"OR",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"LA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"NC",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"ND",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"NE",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"TN",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"NY",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"PA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"AK",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"NV",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"NH",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"VA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"CO",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"CA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"AL",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"AR",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"VT",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"IL",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"GA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"IN",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"IA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"MA",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"AZ",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"ID",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"CT",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"ME",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"MD",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"OK",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"OH",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"UT",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"MO",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"MN",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"MI",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"RI",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"KS",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"MT",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"MS",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"SC",
-			"parcel_level":"tract",
-			"s":false
-		},
-
-		{
-			"state":"KY",
-			"parcel_level":"tract",
-			"s":false
-		}
-	],
-	"county":
-	[
-		{
-			"state":"WV",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NM",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"LA",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NE",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NV",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"NH",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"AL",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"AR",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"ID",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"ME",
-			"parcel_level":"county",
-			"s":false
-		},	
-		{
-			"state":"KS",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"MT",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"MS",
-			"parcel_level":"county",
-			"s":false
-		},
-		{
-			"state":"SC",
-			"parcel_level":"county",
-			"s":false
-		}
-	],
-	 "all_data":
-	[
-		{
-			"state":"WA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"DE",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"WI",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"WV",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"HI",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"SD",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"FL",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"WY",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"NJ",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"NM",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"TX",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"OR",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"LA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"NC",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"ND",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"NE",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"TN",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"NY",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"PA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"AK",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"NV",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"NH",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"VA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"CO",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"CA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"AL",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"AR",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"VT",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"IL",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"GA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"IN",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"IA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MA",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"AZ",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"ID",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"CT",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"ME",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MD",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"OK",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"OH",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"UT",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MO",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MN",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MI",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"RI",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"KS",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MT",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"MS",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"SC",
-			"parcel_level":"county",
-			"s":false
-		},
-
-		{
-			"state":"KY",
-			"parcel_level":"county",
-			"s":false
-		}
-	]
+ "single": [
+  {
+   "state": "TX",
+   "parcel_level": "tract",
+   "s": false
+  }
+ ],
+ "current": [
+  {
+   "state": "OH",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "IL",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "PA",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "TX",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  }
+ ],
+ "paper": [
+  {
+   "state": "MS",
+   "parcel_level": "county",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "MS",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "LA",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "SC",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "AL",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "MD",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "MO",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "TN",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "VA",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "NJ",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "MI",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "NC",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "GA",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "OH",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "IL",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "PA",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "TX",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  }
+ ],
+ "hispanic_paper": [
+  {
+   "state": "NM",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NM",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "CO",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "AZ",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NJ",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "IL",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "TX",
+   "parcel_level": "tract",
+   "s": false
+  }
+ ],
+ "hispanic_only": [
+  {
+   "state": "NM",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NM",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "AZ",
+   "parcel_level": "tract",
+   "s": false
+  }
+ ],
+ "hispanic": [
+  {
+   "state": "DE",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "WV",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "SD",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "WY",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NM",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "LA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ND",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NE",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NH",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AL",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AR",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "VT",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "IA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ID",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ME",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "KS",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MT",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MS",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "SC",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "WA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "DE",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "WV",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "SD",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NJ",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NM",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "TX",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "OR",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "LA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NC",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "ND",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NE",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "TN",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NY",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "PA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "AK",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NV",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NH",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "VA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "CO",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "CA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "AL",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "AR",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "VT",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "IL",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "GA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "IN",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "IA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "MA",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "AZ",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "ID",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "CT",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "ME",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "MD",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "OK",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "OH",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "UT",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "MO",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "MN",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "MI",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "RI",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "KS",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "MT",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "MS",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "SC",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "KY",
+   "parcel_level": "tract",
+   "s": false
+  }
+ ],
+ "county": [
+  {
+   "state": "WV",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NM",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "LA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NE",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NV",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NH",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AL",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AR",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ID",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ME",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "KS",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MT",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MS",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "SC",
+   "parcel_level": "county",
+   "s": false
+  }
+ ],
+ "all_data": [
+  {
+   "state": "WA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "DE",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "WI",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "WV",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "HI",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "SD",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "FL",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "WY",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NJ",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NM",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "TX",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "OR",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "LA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NC",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ND",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NE",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "TN",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NY",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "PA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AK",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NV",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "NH",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "VA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "CO",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "CA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AL",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AR",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "VT",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "IL",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "GA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "IN",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "IA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MA",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "AZ",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ID",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "CT",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "ME",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MD",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "OK",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "OH",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "UT",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MO",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MN",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MI",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "RI",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "KS",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MT",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "MS",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "SC",
+   "parcel_level": "county",
+   "s": false
+  },
+  {
+   "state": "KY",
+   "parcel_level": "county",
+   "s": false
+  }
+ ],
+ "symmetry_feasible": [
+  {
+   "state": "MS",
+   "parcel_level": "county",
+   "s": 6,
+   "group": "black"
+  },
+  {
+   "state": "MS",
+   "parcel_level": "tract",
+   "s": 16,
+   "group": "black"
+  },
+  {
+   "state": "SC",
+   "parcel_level": "tract",
+   "s": 16,
+   "group": "black"
+  },
+  {
+   "state": "LA",
+   "parcel_level": "tract",
+   "s": 33,
+   "group": "black"
+  }
+ ],
+ "symmetry_feasible_hispanic": [
+  {
+   "state": "NM",
+   "parcel_level": "tract",
+   "s": 16,
+   "group": "hispanic"
+  }
+ ],
+ "flny": [
+  {
+   "state": "FL",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "NY",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  }
+ ],
+ "flny_hispanic": [
+  {
+   "state": "FL",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NY",
+   "parcel_level": "tract",
+   "s": false
+  }
+ ],
+ "flnyca": [
+  {
+   "state": "FL",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "NY",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  },
+  {
+   "state": "CA",
+   "parcel_level": "tract",
+   "s": false,
+   "group": "black"
+  }
+ ],
+ "flnyca_hispanic": [
+  {
+   "state": "FL",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "NY",
+   "parcel_level": "tract",
+   "s": false
+  },
+  {
+   "state": "CA",
+   "parcel_level": "tract",
+   "s": false
+  }
+ ]
 }

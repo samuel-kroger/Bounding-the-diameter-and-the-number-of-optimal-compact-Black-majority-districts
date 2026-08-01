@@ -1,4 +1,4 @@
-4519.966799020767 
+540.3929073810577 
 0 neutr
 1 neutr
 2 neutr
@@ -293,7 +293,7 @@
 291 neutr
 292 neutr
 293 neutr
-294 minor
+294 neutr
 295 neutr
 296 neutr
 297 neutr
@@ -1268,9 +1268,9 @@
 1266 neutr
 1267 neutr
 1268 neutr
-1269 minor
-1270 minor
-1271 minor
+1269 neutr
+1270 neutr
+1271 neutr
 1272 neutr
 1273 neutr
 1274 neutr
@@ -1292,7 +1292,7 @@
 1290 neutr
 1291 neutr
 1292 neutr
-1293 minor
+1293 neutr
 1294 neutr
 1295 neutr
 1296 neutr

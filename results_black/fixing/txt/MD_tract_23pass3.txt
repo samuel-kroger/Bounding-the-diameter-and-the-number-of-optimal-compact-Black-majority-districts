@@ -1,4 +1,4 @@
-331.0391311645508 
+634.0821487903595 
 0 neutr
 1 neutr
 2 neutr
@@ -212,7 +212,7 @@
 210 neutr
 211 neutr
 212 neutr
-213 minor
+213 neutr
 214 minor
 215 minor
 216 minor
@@ -228,10 +228,10 @@
 226 minor
 227 minor
 228 minor
-229 minor
+229 neutr
 230 minor
 231 minor
-232 minor
+232 neutr
 233 neutr
 234 neutr
 235 neutr
@@ -810,7 +810,7 @@
 808 neutr
 809 neutr
 810 neutr
-811 minor
+811 neutr
 812 neutr
 813 neutr
 814 neutr

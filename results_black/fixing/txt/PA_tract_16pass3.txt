@@ -1,4 +1,4 @@
-138.62220072746277 
+89.96163392066956 
 0 minor
 1 neutr
 2 minor
@@ -780,7 +780,7 @@
 778 minor
 779 minor
 780 minor
-781 minor
+781 neutr
 782 neutr
 783 neutr
 784 neutr
@@ -798,7 +798,7 @@
 796 neutr
 797 neutr
 798 minor
-799 minor
+799 neutr
 800 neutr
 801 neutr
 802 neutr
@@ -1783,7 +1783,7 @@
 1781 minor
 1782 minor
 1783 minor
-1784 minor
+1784 neutr
 1785 minor
 1786 neutr
 1787 neutr
@@ -1818,7 +1818,7 @@
 1816 minor
 1817 minor
 1818 minor
-1819 minor
+1819 neutr
 1820 neutr
 1821 neutr
 1822 neutr
@@ -2304,7 +2304,7 @@
 2302 neutr
 2303 minor
 2304 minor
-2305 minor
+2305 neutr
 2306 minor
 2307 minor
 2308 neutr
@@ -3173,7 +3173,7 @@
 3171 neutr
 3172 minor
 3173 minor
-3174 minor
+3174 neutr
 3175 minor
 3176 minor
 3177 minor

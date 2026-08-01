@@ -1,4 +1,4 @@
-26.013032913208008 
+12.227584600448608 
 0 minor
 1 minor
 2 minor
@@ -640,7 +640,7 @@
 638 neutr
 639 neutr
 640 minor
-641 minor
+641 neutr
 642 minor
 643 minor
 644 minor
@@ -1294,7 +1294,7 @@
 1292 minor
 1293 minor
 1294 minor
-1295 minor
+1295 neutr
 1296 minor
 1297 minor
 1298 minor
@@ -1322,8 +1322,8 @@
 1320 minor
 1321 neutr
 1322 neutr
-1323 minor
-1324 minor
+1323 neutr
+1324 neutr
 1325 neutr
 1326 minor
 1327 minor
